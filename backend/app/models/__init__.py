@@ -1,0 +1,15 @@
+from app.models.entities import (  # noqa: F401
+    Activity,
+    ActivityType,
+    Album,
+    Artist,
+    Follow,
+    ListItem,
+    ModerationStatus,
+    MusicEntityType,
+    MusicList,
+    Profile,
+    Rating,
+    Track,
+    User,
+)

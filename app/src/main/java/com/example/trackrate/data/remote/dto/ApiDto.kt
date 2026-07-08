@@ -1,0 +1,111 @@
+package com.example.trackrate.data.remote.dto
+
+import com.example.trackrate.domain.model.UserProfile
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class UploadResponseDto(
+    @SerialName("url") val url: String
+)
+
+@Serializable
+data class LoginRequestDto(
+    @SerialName("email") val email: String,
+    @SerialName("password") val password: String
+)
+
+@Serializable
+data class RegisterRequestDto(
+    @SerialName("email") val email: String,
+    @SerialName("password") val password: String
+)
+
+@Serializable
+data class TokenResponseDto(
+    @SerialName("access_token") val accessToken: String,
+    @SerialName("token_type") val tokenType: String = "bearer",
+    @SerialName("user") val user: UserResponseDto
+)
+
+@Serializable
+data class UserResponseDto(
+    @SerialName("id") val id: String,
+    @SerialName("email") val email: String,
+    @SerialName("profile") val profile: ProfileDto
+)
+
+@Serializable
+data class ApiErrorDto(
+    @SerialName("detail") val detail: String? = null
+)
+
+@Serializable
+data class CatalogItemDto(
+    @SerialName("id") val id: String,
+    @SerialName("type") val type: String,
+    @SerialName("title") val title: String,
+    @SerialName("subtitle") val subtitle: String? = null,
+    @SerialName("image_url") val imageUrl: String? = null,
+    @SerialName("year") val year: Int? = null
+)
+
+@Serializable
+data class CatalogDetailDto(
+    @SerialName("id") val id: String,
+    @SerialName("type") val type: String,
+    @SerialName("title") val title: String,
+    @SerialName("subtitle") val subtitle: String? = null,
+    @SerialName("extra") val extra: String? = null,
+    @SerialName("description") val description: String? = null,
+    @SerialName("image_url") val imageUrl: String? = null,
+    @SerialName("year") val year: Int? = null,
+    @SerialName("duration_ms") val durationMs: Int? = null,
+    @SerialName("artist_id") val artistId: String? = null,
+    @SerialName("album_id") val albumId: String? = null
+)
+
+@Serializable
+data class SubmissionDto(
+    @SerialName("id") val id: String,
+    @SerialName("type") val type: String,
+    @SerialName("title") val title: String,
+    @SerialName("subtitle") val subtitle: String? = null,
+    @SerialName("status") val status: String,
+    @SerialName("rejection_reason") val rejectionReason: String? = null
+)
+
+@Serializable
+data class ModerationActionDto(
+    @SerialName("action") val action: String,
+    @SerialName("rejection_reason") val rejectionReason: String? = null
+)
+
+@Serializable
+data class SetAdminRequestDto(
+    @SerialName("make_admin") val makeAdmin: Boolean
+)
+
+@Serializable
+data class RatingUpsertDto(
+    @SerialName("entity_type") val entityType: String,
+    @SerialName("entity_id") val entityId: String,
+    @SerialName("rating") val rating: Double,
+    @SerialName("review") val review: String? = null,
+    @SerialName("listened_at") val listenedAt: String? = null
+)
+
+@Serializable
+data class CreateListRequestDto(
+    @SerialName("title") val title: String,
+    @SerialName("description") val description: String? = null,
+    @SerialName("is_public") val isPublic: Boolean = false
+)
+
+@Serializable
+data class AddListItemRequestDto(
+    @SerialName("entity_type") val entityType: String,
+    @SerialName("entity_id") val entityId: String
+)
+
+fun UserResponseDto.toProfile(): UserProfile = profile.toDomain()

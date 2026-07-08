@@ -1,0 +1,61 @@
+from uuid import UUID
+
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
+
+from app.models import Profile, User
+
+
+class ProfileNotFoundError(Exception):
+    pass
+
+
+class UsernameTakenError(Exception):
+    pass
+
+
+def get_profile_by_username(db: Session, username: str) -> Profile:
+    profile = db.scalar(select(Profile).where(Profile.username == username.strip()))
+    if profile is None:
+        raise ProfileNotFoundError("Usuario no encontrado")
+    return profile
+
+
+def get_profile_by_id(db: Session, user_id: UUID) -> Profile | None:
+    return db.get(Profile, user_id)
+
+
+def update_profile(
+    db: Session,
+    user_id: UUID,
+    username: str,
+    display_name: str | None,
+    bio: str | None,
+) -> Profile:
+    profile = db.get(Profile, user_id)
+    if profile is None:
+        raise ProfileNotFoundError("Perfil no encontrado")
+
+    normalized_username = username.strip()
+    if normalized_username != profile.username:
+        taken = db.scalar(
+            select(Profile.id).where(
+                Profile.username == normalized_username,
+                Profile.id != user_id,
+            )
+        )
+        if taken:
+            raise UsernameTakenError("Ese nombre de usuario ya está en uso")
+        profile.username = normalized_username
+
+    profile.display_name = display_name
+    profile.bio = bio
+    db.commit()
+    db.refresh(profile)
+    return profile
+
+
+def load_user_with_profile(db: Session, user_id: UUID) -> User | None:
+    return db.scalar(
+        select(User).options(joinedload(User.profile)).where(User.id == user_id)
+    )

@@ -1,0 +1,10 @@
+## Copia este archivo como local.properties y rellena los valores.
+## local.properties está en .gitignore y no debe commitearse.
+
+sdk.dir=C\:\\Users\\TU_USUARIO\\AppData\\Local\\Android\\Sdk
+
+# API FastAPI local (emulador Android → localhost del PC)
+API_BASE_URL=http://10.0.2.2:8000
+
+# MinIO (imágenes) — opcional si usas uploads desde el emulador
+# MINIO_PUBLIC_URL=http://10.0.2.2:9000

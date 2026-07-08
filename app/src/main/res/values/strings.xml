@@ -1,0 +1,160 @@
+<resources>
+    <string name="app_name">TrackRate</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">TrackRate</string>
+    <string name="nav_header_subtitle">Valora tu música</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="menu_home">Inicio</string>
+    <string name="menu_search">Buscar</string>
+    <string name="menu_diary">Diario</string>
+    <string name="menu_settings">Ajustes</string>
+    <string name="menu_profile">Mi perfil</string>
+
+    <!-- Legacy menu ids; kept for navigation graph compatibility -->
+    <string name="menu_transform">Inicio</string>
+    <string name="menu_reflow">Buscar</string>
+    <string name="menu_slideshow">Diario</string>
+
+    <string name="lorem_ipsum_title">Lorem Ipsum"</string>
+    <string name="lorem_ipsum">Lorem Ipsum is simply placeholder text of the printing and
+        typesetting industry. Lorem Ipsum has been the industry\'s standard placeholder text ever
+        since the 1500s, when an unknown printer took a galley of type and scrambled it to make a
+        type specimen book"
+    </string>
+    <string name="fab_content_description">Añadir contenido</string>
+    <string name="image_view_item_transform_content_description">Represents an image view in the
+        item
+    </string>
+
+    <!-- Auth -->
+    <string name="auth_login_title">Iniciar sesión</string>
+    <string name="auth_register_title">Crear cuenta</string>
+    <string name="auth_login_action">Entrar</string>
+    <string name="auth_register_action">Registrarse</string>
+    <string name="auth_toggle_to_register">¿No tienes cuenta? Regístrate</string>
+    <string name="auth_toggle_to_login">¿Ya tienes cuenta? Inicia sesión</string>
+    <string name="auth_email_hint">Email</string>
+    <string name="auth_password_hint">Contraseña</string>
+    <string name="auth_confirm_password_hint">Confirmar contraseña</string>
+
+    <!-- Settings / Perfil -->
+    <string name="settings_profile_title">Tu perfil</string>
+    <string name="settings_admin_badge">Administrador</string>
+    <string name="settings_username_hint">Nombre de usuario</string>
+    <string name="settings_display_name_hint">Nombre para mostrar</string>
+    <string name="settings_bio_hint">Biografía</string>
+    <string name="settings_save">Guardar</string>
+    <string name="settings_sign_out">Cerrar sesión</string>
+    <string name="settings_change_avatar">Cambiar foto de perfil</string>
+
+    <!-- Uploads -->
+    <string name="upload_pick_image">Seleccionar imagen</string>
+    <string name="upload_image_optional">Imagen (opcional)</string>
+    <string name="upload_image_success">Imagen subida correctamente</string>
+    <string name="submission_upload_image">Subir imagen</string>
+    <string name="list_upload_cover">Cambiar portada</string>
+    <string name="upload_in_progress">Subiendo imagen…</string>
+    <string name="search_hint">Buscar música</string>
+    <string name="search_empty">No hay resultados</string>
+    <string name="catalog_artists">Artistas</string>
+    <string name="catalog_albums">Álbumes</string>
+    <string name="catalog_tracks">Canciones</string>
+    <string name="catalog_type_artist">Artista</string>
+    <string name="catalog_type_album">Álbum</string>
+    <string name="catalog_type_track">Canción</string>
+
+    <!-- Envío de catálogo -->
+    <string name="submit_title">Añadir al catálogo</string>
+    <string name="submit_name_hint">Nombre del artista</string>
+    <string name="submit_bio_hint">Biografía (opcional)</string>
+    <string name="submit_artist_hint">Artista</string>
+    <string name="submit_album_title_hint">Título del álbum</string>
+    <string name="submit_track_title_hint">Título de la canción</string>
+    <string name="submit_year_hint">Año de lanzamiento (opcional)</string>
+    <string name="submit_album_hint">Álbum (opcional)</string>
+    <string name="submit_album_optional">Este artista no tiene álbumes aprobados todavía</string>
+    <string name="submit_duration_hint">Duración en segundos (opcional)</string>
+    <string name="submit_action">Enviar a revisión</string>
+    <string name="submit_success">Enviado. Quedará visible tras la aprobación de un administrador.</string>
+
+    <!-- Estados de moderación -->
+    <string name="mod_status_pending">Pendiente</string>
+    <string name="mod_status_approved">Aprobado</string>
+    <string name="mod_status_rejected">Rechazado</string>
+
+    <!-- Mis envíos -->
+    <string name="submissions_title">Mis envíos</string>
+    <string name="submissions_empty">Aún no has enviado nada al catálogo</string>
+
+    <!-- Moderación (admin) -->
+    <string name="moderation_title">Moderación</string>
+    <string name="moderation_empty">No hay envíos pendientes</string>
+    <string name="mod_approve">Aprobar</string>
+    <string name="mod_reject">Rechazar</string>
+    <string name="mod_reject_title">Motivo del rechazo</string>
+    <string name="mod_reject_reason_hint">Explica por qué se rechaza</string>
+    <string name="mod_reject_reason_required">Debes indicar un motivo</string>
+
+    <!-- Administradores (admin) -->
+    <string name="admin_users_title">Administradores</string>
+    <string name="admin_users_help">Otorga o revoca el rol de administrador a un usuario ya registrado, indicando su nombre de usuario.</string>
+    <string name="admin_users_username_hint">Nombre de usuario</string>
+    <string name="admin_users_grant">Hacer administrador</string>
+    <string name="admin_users_revoke">Quitar administrador</string>
+
+    <!-- Valoraciones -->
+    <string name="rating_community_title">Valoración de la comunidad</string>
+    <string name="rating_yours_title">Tu valoración</string>
+    <string name="rating_none_yet">Sin valoraciones aún</string>
+    <string name="rating_rate_action">Valorar</string>
+    <string name="rating_edit_action">Editar valoración</string>
+    <string name="rating_delete_action">Eliminar valoración</string>
+    <string name="rating_delete_confirm">¿Seguro que quieres eliminar tu valoración?</string>
+    <string name="rating_dialog_title">Tu valoración</string>
+    <string name="rating_review_hint">Reseña (opcional)</string>
+    <string name="rating_min_required">Selecciona al menos media estrella</string>
+    <plurals name="rating_count">
+        <item quantity="one">%d valoración</item>
+        <item quantity="other">%d valoraciones</item>
+    </plurals>
+
+    <!-- Diario -->
+    <string name="diary_empty">Aún no has valorado nada. Abre un álbum, canción o artista para empezar.</string>
+
+    <!-- Feed / Inicio -->
+    <string name="feed_empty">Tu feed está vacío. Valora algo o sigue a otros usuarios para ver su actividad aquí.</string>
+    <string name="feed_activity_rated">%1$s valoró %2$s</string>
+    <string name="feed_activity_reviewed">%1$s reseñó %2$s</string>
+    <string name="feed_activity_updated">%1$s actualizó su valoración de %2$s</string>
+
+    <!-- Perfil público -->
+    <string name="profile_follow">Seguir</string>
+    <string name="profile_unfollow">Dejar de seguir</string>
+    <string name="profile_followers">Seguidores</string>
+    <string name="profile_following">Siguiendo</string>
+    <string name="profile_ratings">Valoraciones</string>
+    <string name="profile_recent_ratings">Valoraciones recientes</string>
+    <string name="profile_ratings_empty">Este usuario aún no ha valorado nada</string>
+    <string name="profile_rating_stats_title">Estadísticas de valoración</string>
+    <string name="profile_average_rating">Media otorgada: %1$.1f ★</string>
+    <plurals name="profile_review_count">
+        <item quantity="one">%d reseña escrita</item>
+        <item quantity="other">%d reseñas escritas</item>
+    </plurals>
+
+    <!-- Listas -->
+    <string name="lists_title">Mis listas</string>
+    <string name="lists_create">Crear lista</string>
+    <string name="lists_empty">Aún no tienes listas. Pulsa + para crear una.</string>
+    <string name="lists_empty_create_first">Crea una lista primero para añadir contenido</string>
+    <string name="lists_items_empty">Esta lista está vacía</string>
+    <string name="lists_title_hint">Título de la lista</string>
+    <string name="lists_description_hint">Descripción (opcional)</string>
+    <string name="lists_public_checkbox">Lista pública</string>
+    <string name="lists_public">Pública</string>
+    <string name="lists_title_required">El título es obligatorio</string>
+    <string name="lists_add_to">Añadir a lista</string>
+</resources>
