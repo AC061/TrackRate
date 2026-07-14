@@ -4,6 +4,8 @@ import com.example.trackrate.data.remote.TrackRateApi
 import com.example.trackrate.data.remote.dto.ModerationActionDto
 import com.example.trackrate.data.remote.dto.toApiType
 import com.example.trackrate.data.remote.dto.toSubmission
+import com.example.trackrate.data.remote.dto.toDomain
+import com.example.trackrate.domain.model.CatalogDetail
 import com.example.trackrate.domain.model.CatalogSubmission
 import com.example.trackrate.domain.model.CatalogType
 import javax.inject.Inject
@@ -19,6 +21,9 @@ class ModerationRepository @Inject constructor(
 
     suspend fun getMySubmissions(): List<CatalogSubmission> =
         api.getMySubmissions().map { it.toSubmission() }
+
+    suspend fun getSubmissionDetail(type: CatalogType, id: String): CatalogDetail =
+        api.getModerationDetail(type.toApiType(), id).toDomain()
 
     suspend fun approve(type: CatalogType, id: String) {
         api.moderate(type.toApiType(), id, ModerationActionDto(action = "approve"))

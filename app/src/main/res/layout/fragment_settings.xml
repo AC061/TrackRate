@@ -50,15 +50,6 @@
                 android:layout_gravity="center_horizontal"
                 android:text="@string/settings_change_avatar" />
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/admin_badge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="@string/settings_admin_badge"
-                android:visibility="gone"
-                app:chipIcon="@drawable/ic_mdi_shield_account" />
-
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/username_layout"
                 android:layout_width="match_parent"
@@ -127,31 +118,26 @@
                 android:text="@string/submissions_title"
                 app:icon="@drawable/ic_mdi_clock_outline" />
 
-            <LinearLayout
-                android:id="@+id/admin_section"
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_marginTop="24dp"
+                android:background="?android:attr/listDivider" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/settings_customization_title"
+                android:textAppearance="?attr/textAppearanceHeadline6" />
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:visibility="gone">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/moderation_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical|start"
-                    android:text="@string/moderation_title"
-                    app:icon="@drawable/ic_mdi_check_circle" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/admin_users_button"
-                    style="@style/Widget.MaterialComponents.Button.TextButton"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical|start"
-                    android:text="@string/admin_users_title"
-                    app:icon="@drawable/ic_mdi_shield_account" />
-            </LinearLayout>
+                android:layout_marginTop="8dp"
+                android:text="@string/settings_customization_coming_soon"
+                android:textAppearance="?attr/textAppearanceBody2"
+                android:textColor="?android:attr/textColorSecondary" />
 
             <View
                 android:layout_width="match_parent"

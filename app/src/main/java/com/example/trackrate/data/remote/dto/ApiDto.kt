@@ -5,6 +5,27 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class RecordLabelDto(
+    @SerialName("id") val id: String,
+    @SerialName("name") val name: String
+)
+
+@Serializable
+data class CreateRecordLabelDto(
+    @SerialName("name") val name: String
+)
+
+@Serializable
+data class TopRatedTrackDto(
+    @SerialName("id") val id: String,
+    @SerialName("title") val title: String,
+    @SerialName("subtitle") val subtitle: String? = null,
+    @SerialName("image_url") val imageUrl: String? = null,
+    @SerialName("average_rating") val averageRating: Double,
+    @SerialName("rating_count") val ratingCount: Int
+)
+
+@Serializable
 data class UploadResponseDto(
     @SerialName("url") val url: String
 )
@@ -51,6 +72,24 @@ data class CatalogItemDto(
 )
 
 @Serializable
+data class ContributorResponseDto(
+    @SerialName("artist_id") val artistId: String,
+    @SerialName("artist_name") val artistName: String,
+    @SerialName("role") val role: String,
+    @SerialName("role_label") val roleLabel: String,
+    @SerialName("notes") val notes: String? = null
+)
+
+@Serializable
+data class SampleResponseDto(
+    @SerialName("track_id") val trackId: String,
+    @SerialName("title") val title: String,
+    @SerialName("artist_name") val artistName: String,
+    @SerialName("album_title") val albumTitle: String? = null,
+    @SerialName("notes") val notes: String? = null
+)
+
+@Serializable
 data class CatalogDetailDto(
     @SerialName("id") val id: String,
     @SerialName("type") val type: String,
@@ -62,7 +101,12 @@ data class CatalogDetailDto(
     @SerialName("year") val year: Int? = null,
     @SerialName("duration_ms") val durationMs: Int? = null,
     @SerialName("artist_id") val artistId: String? = null,
-    @SerialName("album_id") val albumId: String? = null
+    @SerialName("album_id") val albumId: String? = null,
+    @SerialName("label") val label: String? = null,
+    @SerialName("label_id") val labelId: String? = null,
+    @SerialName("status") val status: String? = null,
+    @SerialName("contributors") val contributors: List<ContributorResponseDto> = emptyList(),
+    @SerialName("samples") val samples: List<SampleResponseDto> = emptyList()
 )
 
 @Serializable

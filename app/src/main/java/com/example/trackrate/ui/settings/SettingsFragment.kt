@@ -12,8 +12,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
-import com.example.trackrate.AdminUsersActivity
-import com.example.trackrate.ModerationActivity
 import com.example.trackrate.R
 import com.example.trackrate.SubmissionsActivity
 import com.example.trackrate.databinding.FragmentSettingsBinding
@@ -67,12 +65,6 @@ class SettingsFragment : Fragment() {
         binding.submissionsButton.setOnClickListener {
             startActivity(SubmissionsActivity.newIntent(requireContext()))
         }
-        binding.moderationButton.setOnClickListener {
-            startActivity(ModerationActivity.newIntent(requireContext()))
-        }
-        binding.adminUsersButton.setOnClickListener {
-            startActivity(AdminUsersActivity.newIntent(requireContext()))
-        }
 
         observeState()
     }
@@ -89,10 +81,6 @@ class SettingsFragment : Fragment() {
                     binding.saveButton.isEnabled = !state.isSaving && !state.isUploadingAvatar
                     binding.changeAvatarButton.isEnabled = !state.isUploadingAvatar
                     binding.avatar.isEnabled = !state.isUploadingAvatar
-
-                    val isAdmin = state.profile?.isAdmin == true
-                    binding.adminBadge.visibility = if (isAdmin) View.VISIBLE else View.GONE
-                    binding.adminSection.visibility = if (isAdmin) View.VISIBLE else View.GONE
 
                     state.profile?.let { profile ->
                         binding.avatar.load(profile.avatarUrl) {

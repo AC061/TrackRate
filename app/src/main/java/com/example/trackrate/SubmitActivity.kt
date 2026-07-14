@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -13,8 +14,13 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
 import com.example.trackrate.databinding.ActivitySubmitBinding
+import com.example.trackrate.databinding.ItemContributorDraftBinding
+import com.example.trackrate.databinding.ItemSampleDraftBinding
 import com.example.trackrate.domain.model.CatalogItem
 import com.example.trackrate.domain.model.CatalogType
+import com.example.trackrate.domain.model.ContributorDraft
+import com.example.trackrate.domain.model.ContributorRole
+import com.example.trackrate.domain.model.SampleDraft
 import com.example.trackrate.ui.submit.SubmitViewModel
 import com.example.trackrate.util.ImageUriReader
 import com.google.android.material.snackbar.Snackbar
@@ -29,9 +35,18 @@ class SubmitActivity : AppCompatActivity() {
 
     private var artists: List<CatalogItem> = emptyList()
     private var albums: List<CatalogItem> = emptyList()
+    private var tracks: List<CatalogItem> = emptyList()
     private var selectedArtistId: String? = null
     private var selectedAlbumId: String? = null
     private var selectedImageUri: Uri? = null
+
+    private var selectedLabelId: String? = null
+    private var labels: List<com.example.trackrate.domain.model.RecordLabel> = emptyList()
+    private val contributorRows = mutableListOf<ContributorRow>()
+    private val sampleRows = mutableListOf<SampleRow>()
+
+    private val roleLabels = ContributorRole.entries.map { it.label }.toTypedArray()
+    private val roleValues = ContributorRole.entries.toTypedArray()
 
     private val pickImage = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         selectedImageUri = uri
@@ -76,10 +91,16 @@ class SubmitActivity : AppCompatActivity() {
             selectedAlbumId = albums.getOrNull(position)?.id
         }
 
+        binding.labelDropdown.setOnItemClickListener { _, _, position, _ ->
+            selectedLabelId = labels.getOrNull(position)?.id
+        }
+
         binding.pickImageButton.setOnClickListener {
             pickImage.launch("image/*")
         }
 
+        binding.addContributorButton.setOnClickListener { addContributorRow() }
+        binding.addSampleButton.setOnClickListener { addSampleRow() }
         binding.submitButton.setOnClickListener { submit() }
 
         observeState()
@@ -88,10 +109,27 @@ class SubmitActivity : AppCompatActivity() {
 
     private fun applyType(type: CatalogType) {
         binding.bioLayout.visibility = if (type == CatalogType.ARTIST) View.VISIBLE else View.GONE
+        binding.descriptionLayout.visibility =
+            if (type == CatalogType.ALBUM || type == CatalogType.TRACK) View.VISIBLE else View.GONE
+        binding.labelLayout.visibility =
+            if (type == CatalogType.ALBUM || type == CatalogType.TRACK) View.VISIBLE else View.GONE
         binding.artistLayout.visibility = if (type == CatalogType.ARTIST) View.GONE else View.VISIBLE
         binding.yearLayout.visibility = if (type == CatalogType.ALBUM) View.VISIBLE else View.GONE
         binding.albumLayout.visibility = if (type == CatalogType.TRACK) View.VISIBLE else View.GONE
         binding.durationLayout.visibility = if (type == CatalogType.TRACK) View.VISIBLE else View.GONE
+
+        val showContributors = type == CatalogType.ALBUM || type == CatalogType.TRACK
+        binding.contributorsTitle.visibility = if (showContributors) View.VISIBLE else View.GONE
+        binding.contributorsContainer.visibility = if (showContributors) View.VISIBLE else View.GONE
+        binding.addContributorButton.visibility = if (showContributors) View.VISIBLE else View.GONE
+
+        val showSamples = type == CatalogType.TRACK
+        binding.samplesTitle.visibility = if (showSamples) View.VISIBLE else View.GONE
+        binding.samplesContainer.visibility = if (showSamples) View.VISIBLE else View.GONE
+        binding.addSampleButton.visibility = if (showSamples) View.VISIBLE else View.GONE
+
+        if (!showContributors) clearContributorRows()
+        if (!showSamples) clearSampleRows()
 
         binding.titleLayout.setHint(
             when (type) {
@@ -101,6 +139,74 @@ class SubmitActivity : AppCompatActivity() {
             }
         )
     }
+
+    private fun addContributorRow() {
+        val rowBinding = ItemContributorDraftBinding.inflate(
+            LayoutInflater.from(this), binding.contributorsContainer, true
+        )
+        rowBinding.contributorArtistDropdown.setSimpleItems(artists.map { it.title }.toTypedArray())
+        rowBinding.contributorRoleDropdown.setSimpleItems(roleLabels)
+        rowBinding.contributorRoleDropdown.setText(roleLabels.first(), false)
+
+        val row = ContributorRow(rowBinding)
+        rowBinding.contributorArtistDropdown.setOnItemClickListener { _, _, position, _ ->
+            row.selectedArtistId = artists.getOrNull(position)?.id
+        }
+        rowBinding.contributorRoleDropdown.setOnItemClickListener { _, _, position, _ ->
+            row.selectedRole = roleValues.getOrNull(position) ?: ContributorRole.PRODUCER
+        }
+        rowBinding.removeContributorButton.setOnClickListener {
+            binding.contributorsContainer.removeView(rowBinding.root)
+            contributorRows.remove(row)
+        }
+        contributorRows.add(row)
+    }
+
+    private fun addSampleRow() {
+        val rowBinding = ItemSampleDraftBinding.inflate(
+            LayoutInflater.from(this), binding.samplesContainer, true
+        )
+        rowBinding.sampleTrackDropdown.setSimpleItems(tracks.map { it.title }.toTypedArray())
+
+        val row = SampleRow(rowBinding)
+        rowBinding.sampleTrackDropdown.setOnItemClickListener { _, _, position, _ ->
+            row.selectedTrackId = tracks.getOrNull(position)?.id
+        }
+        rowBinding.removeSampleButton.setOnClickListener {
+            binding.samplesContainer.removeView(rowBinding.root)
+            sampleRows.remove(row)
+        }
+        sampleRows.add(row)
+    }
+
+    private fun clearContributorRows() {
+        binding.contributorsContainer.removeAllViews()
+        contributorRows.clear()
+    }
+
+    private fun clearSampleRows() {
+        binding.samplesContainer.removeAllViews()
+        sampleRows.clear()
+    }
+
+    private fun collectContributors(): List<ContributorDraft> =
+        contributorRows.mapNotNull { row ->
+            val artistId = row.selectedArtistId ?: return@mapNotNull null
+            ContributorDraft(
+                artistId = artistId,
+                role = row.selectedRole,
+                notes = row.binding.contributorNotesInput.text?.toString()
+            )
+        }
+
+    private fun collectSamples(): List<SampleDraft> =
+        sampleRows.mapNotNull { row ->
+            val trackId = row.selectedTrackId ?: return@mapNotNull null
+            SampleDraft(
+                sampledTrackId = trackId,
+                notes = row.binding.sampleNotesInput.text?.toString()
+            )
+        }
 
     private fun submit() {
         val title = binding.titleInput.text?.toString().orEmpty()
@@ -113,7 +219,10 @@ class SubmitActivity : AppCompatActivity() {
             CatalogType.ALBUM -> viewModel.submitAlbum(
                 title = title,
                 artistId = selectedArtistId,
-                releaseYear = binding.yearInput.text?.toString()?.toIntOrNull()
+                releaseYear = binding.yearInput.text?.toString()?.toIntOrNull(),
+                description = binding.descriptionInput.text?.toString(),
+                labelId = selectedLabelId,
+                contributors = collectContributors()
             )
 
             CatalogType.TRACK -> {
@@ -122,7 +231,11 @@ class SubmitActivity : AppCompatActivity() {
                     title = title,
                     artistId = selectedArtistId,
                     albumId = selectedAlbumId,
-                    durationMs = seconds?.let { it * 1000 }
+                    durationMs = seconds?.let { it * 1000 },
+                    description = binding.descriptionInput.text?.toString(),
+                    labelId = selectedLabelId,
+                    contributors = collectContributors(),
+                    samples = collectSamples()
                 )
             }
         }
@@ -139,10 +252,27 @@ class SubmitActivity : AppCompatActivity() {
                     if (state.artists !== artists) {
                         artists = state.artists
                         binding.artistDropdown.setSimpleItems(artists.map { it.title }.toTypedArray())
+                        contributorRows.forEach { row ->
+                            row.binding.contributorArtistDropdown.setSimpleItems(
+                                artists.map { it.title }.toTypedArray()
+                            )
+                        }
                     }
                     if (state.albums !== albums) {
                         albums = state.albums
                         binding.albumDropdown.setSimpleItems(albums.map { it.title }.toTypedArray())
+                    }
+                    if (state.tracks !== tracks) {
+                        tracks = state.tracks
+                        sampleRows.forEach { row ->
+                            row.binding.sampleTrackDropdown.setSimpleItems(
+                                tracks.map { it.title }.toTypedArray()
+                            )
+                        }
+                    }
+                    if (state.labels !== labels) {
+                        labels = state.labels
+                        binding.labelDropdown.setSimpleItems(labels.map { it.name }.toTypedArray())
                     }
                     binding.albumLayout.helperText =
                         if (state.type == CatalogType.TRACK && albums.isEmpty())
@@ -187,6 +317,17 @@ class SubmitActivity : AppCompatActivity() {
             }
         }
     }
+
+    private class ContributorRow(
+        val binding: ItemContributorDraftBinding,
+        var selectedArtistId: String? = null,
+        var selectedRole: ContributorRole = ContributorRole.PRODUCER
+    )
+
+    private class SampleRow(
+        val binding: ItemSampleDraftBinding,
+        var selectedTrackId: String? = null
+    )
 
     companion object {
         fun newIntent(context: Context): Intent = Intent(context, SubmitActivity::class.java)

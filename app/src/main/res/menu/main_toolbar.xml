@@ -7,4 +7,11 @@
         android:icon="@drawable/ic_mdi_account"
         android:title="@string/menu_profile"
         app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_moderation"
+        android:icon="@drawable/ic_mdi_shield_account"
+        android:title="@string/moderation_options_title"
+        android:visible="false"
+        app:showAsAction="always" />
 </menu>

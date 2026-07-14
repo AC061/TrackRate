@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.example.trackrate.databinding.ActivityDetailBinding
 import com.example.trackrate.databinding.DialogRatingBinding
@@ -16,7 +17,9 @@ import com.example.trackrate.domain.model.CatalogDetail
 import com.example.trackrate.domain.model.CatalogType
 import com.example.trackrate.domain.model.Rating
 import com.example.trackrate.domain.model.RatingStats
+import com.example.trackrate.ui.detail.ContributorAdapter
 import com.example.trackrate.ui.detail.DetailViewModel
+import com.example.trackrate.ui.detail.SampleAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
@@ -28,6 +31,8 @@ class DetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     private val viewModel: DetailViewModel by viewModels()
+    private lateinit var contributorAdapter: ContributorAdapter
+    private lateinit var sampleAdapter: SampleAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,6 +46,17 @@ class DetailActivity : AppCompatActivity() {
         val typeName = intent.getStringExtra(EXTRA_TYPE) ?: CatalogType.ALBUM.name
         val type = CatalogType.valueOf(typeName)
         val id = intent.getStringExtra(EXTRA_ID).orEmpty()
+
+        contributorAdapter = ContributorAdapter { artistId ->
+            startActivity(newIntent(this, CatalogType.ARTIST, artistId))
+        }
+        sampleAdapter = SampleAdapter { trackId ->
+            startActivity(newIntent(this, CatalogType.TRACK, trackId))
+        }
+        binding.contributorsList.layoutManager = LinearLayoutManager(this)
+        binding.contributorsList.adapter = contributorAdapter
+        binding.samplesList.layoutManager = LinearLayoutManager(this)
+        binding.samplesList.adapter = sampleAdapter
 
         binding.rateButton.setOnClickListener { showRatingDialog() }
         binding.deleteRatingButton.setOnClickListener { confirmDeleteRating() }
@@ -193,6 +209,23 @@ class DetailActivity : AppCompatActivity() {
         binding.description.text = detail.description.orEmpty()
         binding.description.visibility =
             if (detail.description.isNullOrBlank()) View.GONE else View.VISIBLE
+
+        val hasContributors = detail.contributors.isNotEmpty()
+        binding.contributorsSectionTitle.visibility = if (hasContributors) View.VISIBLE else View.GONE
+        binding.contributorsList.visibility = if (hasContributors) View.VISIBLE else View.GONE
+        contributorAdapter.submitList(detail.contributors)
+
+        val hasSamples = detail.samples.isNotEmpty()
+        binding.samplesSectionTitle.visibility = if (hasSamples) View.VISIBLE else View.GONE
+        binding.samplesList.visibility = if (hasSamples) View.VISIBLE else View.GONE
+        sampleAdapter.submitList(detail.samples)
+
+        if (detail.label.isNullOrBlank()) {
+            binding.labelCredit.visibility = View.GONE
+        } else {
+            binding.labelCredit.visibility = View.VISIBLE
+            binding.labelCredit.text = getString(R.string.detail_label_credit, detail.label)
+        }
     }
 
     private fun formatDuration(ms: Int): String {

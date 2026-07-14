@@ -4,6 +4,7 @@ import android.content.Context
 import coil.ImageLoader
 import coil.disk.DiskCache
 import coil.memory.MemoryCache
+import com.example.trackrate.util.MediaUrlInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,6 +21,9 @@ object AppModule {
     fun provideImageLoader(@ApplicationContext context: Context): ImageLoader {
         return ImageLoader.Builder(context)
             .crossfade(true)
+            .components {
+                add(MediaUrlInterceptor())
+            }
             .memoryCache {
                 MemoryCache.Builder(context)
                     .maxSizePercent(0.25)

@@ -48,7 +48,19 @@
             android:exported="false"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
+            android:name=".ModerationOptionsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
             android:name=".ModerationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
+            android:name=".ModerationReviewActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
+            android:name=".LabelsActivity"
             android:exported="false"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity

@@ -7,6 +7,7 @@ from app.models import Activity, Profile, Rating
 from app.schemas.social import ActivityFeedResponse
 from app.services.entity_helpers import resolve_entity_titles
 from app.services.follow_service import get_following_ids
+from app.services.storage_service import normalize_stored_media_url
 
 FEED_LIMIT = 50
 
@@ -34,7 +35,7 @@ def get_feed(db: Session, user_id: UUID, limit: int = FEED_LIMIT) -> list[Activi
                 user_id=activity.user_id,
                 username=profile.username,
                 display_name=profile.display_name,
-                avatar_url=profile.avatar_url,
+                avatar_url=normalize_stored_media_url(profile.avatar_url),
                 activity_type=activity.activity_type.value,
                 created_at=activity.created_at,
                 rating=score,

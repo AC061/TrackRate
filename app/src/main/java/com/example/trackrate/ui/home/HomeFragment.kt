@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.trackrate.DetailActivity
 import com.example.trackrate.ProfileActivity
 import com.example.trackrate.databinding.FragmentHomeBinding
+import com.example.trackrate.domain.model.CatalogType
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -24,7 +25,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val viewModel: HomeViewModel by viewModels()
-    private val adapter by lazy {
+    private val feedAdapter by lazy {
         FeedAdapter(
             onProfileClick = { item ->
                 startActivity(ProfileActivity.newIntent(requireContext(), item.username))
@@ -33,6 +34,11 @@ class HomeFragment : Fragment() {
                 startActivity(DetailActivity.newIntent(requireContext(), item.entityType, item.entityId))
             }
         )
+    }
+    private val topRatedAdapter by lazy {
+        TopRatedAdapter { track ->
+            startActivity(DetailActivity.newIntent(requireContext(), CatalogType.TRACK, track.id))
+        }
     }
 
     override fun onCreateView(
@@ -48,13 +54,20 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.recycler.layoutManager = LinearLayoutManager(requireContext())
-        binding.recycler.adapter = adapter
+        binding.recycler.adapter = feedAdapter
+
+        binding.topRatedRecycler.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
+        binding.topRatedRecycler.adapter = topRatedAdapter
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progress.visibility = if (state.isLoading) View.VISIBLE else View.GONE
-                    adapter.submitList(state.items)
+                    topRatedAdapter.submitList(state.topRated)
+                    binding.topRatedEmpty.visibility =
+                        if (!state.isLoading && state.topRated.isEmpty()) View.VISIBLE else View.GONE
+                    feedAdapter.submitList(state.items)
                     binding.emptyView.visibility =
                         if (!state.isLoading && state.items.isEmpty()) View.VISIBLE else View.GONE
                     state.message?.let {

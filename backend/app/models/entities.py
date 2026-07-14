@@ -41,6 +41,29 @@ class ActivityType(str, enum.Enum):
     UPDATED = "updated"
 
 
+class ContributorRole(str, enum.Enum):
+    PRODUCER = "producer"
+    FEATURED_ARTIST = "featured_artist"
+    COMPOSER = "composer"
+    LYRICIST = "lyricist"
+    ENGINEER = "engineer"
+    MIXER = "mixer"
+    MASTERING = "mastering"
+    OTHER = "other"
+
+
+CONTRIBUTOR_ROLE_LABELS: dict[ContributorRole, str] = {
+    ContributorRole.PRODUCER: "Productor",
+    ContributorRole.FEATURED_ARTIST: "Artista invitado",
+    ContributorRole.COMPOSER: "Compositor",
+    ContributorRole.LYRICIST: "Letrista",
+    ContributorRole.ENGINEER: "Ingeniero de sonido",
+    ContributorRole.MIXER: "Mezcla",
+    ContributorRole.MASTERING: "Masterización",
+    ContributorRole.OTHER: "Otro",
+}
+
+
 def _pg_enum(enum_cls: type[enum.Enum], name: str) -> Enum:
     return Enum(
         enum_cls,
@@ -85,6 +108,14 @@ class Profile(Base):
     user: Mapped["User"] = relationship(back_populates="profile")
 
 
+class RecordLabel(Base):
+    __tablename__ = "record_labels"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(Text, nullable=False, unique=True, index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Artist(Base):
     __tablename__ = "artists"
 
@@ -119,6 +150,8 @@ class Album(Base):
     artist_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("artists.id"))
     release_year: Mapped[int | None] = mapped_column(Integer)
     cover_url: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    label_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("record_labels.id"))
     submitted_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("profiles.id"))
     status: Mapped[ModerationStatus] = mapped_column(
         _pg_enum(ModerationStatus, "moderation_status"), default=ModerationStatus.PENDING
@@ -144,6 +177,8 @@ class Track(Base):
     artist_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("artists.id"))
     duration_ms: Mapped[int | None] = mapped_column(Integer)
     cover_url: Mapped[str | None] = mapped_column(Text)
+    description: Mapped[str | None] = mapped_column(Text)
+    label_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("record_labels.id"))
     submitted_by: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("profiles.id"))
     status: Mapped[ModerationStatus] = mapped_column(
         _pg_enum(ModerationStatus, "moderation_status"), default=ModerationStatus.PENDING
@@ -155,6 +190,39 @@ class Track(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
+
+
+class CatalogContributor(Base):
+    __tablename__ = "catalog_contributors"
+    __table_args__ = (
+        UniqueConstraint(
+            "entity_type", "entity_id", "artist_id", "role", name="catalog_contributors_unique"
+        ),
+        Index("ix_catalog_contributors_entity", "entity_type", "entity_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    entity_type: Mapped[MusicEntityType] = mapped_column(_pg_enum(MusicEntityType, "music_entity_type"))
+    entity_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    artist_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("artists.id"))
+    role: Mapped[ContributorRole] = mapped_column(_pg_enum(ContributorRole, "contributor_role"))
+    notes: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+
+
+class TrackSample(Base):
+    __tablename__ = "track_samples"
+    __table_args__ = (
+        UniqueConstraint("track_id", "sampled_track_id", name="track_samples_unique"),
+        CheckConstraint("track_id <> sampled_track_id", name="track_samples_no_self"),
+        Index("ix_track_samples_track_id", "track_id"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    track_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tracks.id"))
+    sampled_track_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("tracks.id"))
+    notes: Mapped[str | None] = mapped_column(Text)
+    sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
 
 class Rating(Base):

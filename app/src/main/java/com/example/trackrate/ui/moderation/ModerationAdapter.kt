@@ -9,6 +9,7 @@ import com.example.trackrate.databinding.ItemModerationBinding
 import com.example.trackrate.domain.model.CatalogSubmission
 
 class ModerationAdapter(
+    private val onReview: (CatalogSubmission) -> Unit,
     private val onApprove: (CatalogSubmission) -> Unit,
     private val onReject: (CatalogSubmission) -> Unit
 ) : ListAdapter<CatalogSubmission, ModerationAdapter.ViewHolder>(DIFF) {
@@ -17,13 +18,14 @@ class ModerationAdapter(
         val binding = ItemModerationBinding.inflate(
             LayoutInflater.from(parent.context), parent, false
         )
-        return ViewHolder(binding, onApprove, onReject)
+        return ViewHolder(binding, onReview, onApprove, onReject)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(getItem(position))
 
     class ViewHolder(
         private val binding: ItemModerationBinding,
+        private val onReview: (CatalogSubmission) -> Unit,
         private val onApprove: (CatalogSubmission) -> Unit,
         private val onReject: (CatalogSubmission) -> Unit
     ) : RecyclerView.ViewHolder(binding.root) {
@@ -39,6 +41,7 @@ class ModerationAdapter(
             }
             binding.subtitle.text = subtitleParts.joinToString(" • ")
 
+            binding.root.setOnClickListener { onReview(item) }
             binding.approveButton.setOnClickListener { onApprove(item) }
             binding.rejectButton.setOnClickListener { onReject(item) }
         }

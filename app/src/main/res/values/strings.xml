@@ -12,6 +12,10 @@
     <string name="menu_diary">Diario</string>
     <string name="menu_settings">Ajustes</string>
     <string name="menu_profile">Mi perfil</string>
+    <string name="moderation_options_title">Opciones de moderación</string>
+    <string name="moderation_options_subtitle">Herramientas de administración del catálogo y la plataforma.</string>
+    <string name="settings_customization_title">Personalización</string>
+    <string name="settings_customization_coming_soon">Próximamente podrás personalizar la apariencia y el comportamiento de la app.</string>
 
     <!-- Legacy menu ids; kept for navigation graph compatibility -->
     <string name="menu_transform">Inicio</string>
@@ -69,7 +73,30 @@
     <!-- Envío de catálogo -->
     <string name="submit_title">Añadir al catálogo</string>
     <string name="submit_name_hint">Nombre del artista</string>
-    <string name="submit_bio_hint">Biografía (opcional)</string>
+    <string name="submit_bio_hint">Descripción (opcional)</string>
+    <string name="submit_description_hint">Descripción (opcional)</string>
+    <string name="submit_label_hint">Sello discográfico (opcional)</string>
+    <string name="labels_title">Sellos discográficos</string>
+    <string name="labels_add">Añadir sello</string>
+    <string name="labels_name_hint">Nombre del sello</string>
+    <string name="labels_empty">No hay sellos registrados</string>
+    <string name="moderation_review_title">Revisar envío</string>
+    <string name="mod_action_done">Moderación completada</string>
+    <string name="home_top_rated_title">Mejor valoradas</string>
+    <string name="home_top_rated_empty">Aún no hay canciones valoradas</string>
+    <string name="home_feed_title">Actividad</string>
+    <string name="submit_contributors_title">Contribuyentes</string>
+    <string name="submit_add_contributor">Añadir contribuyente</string>
+    <string name="submit_contributor_role_hint">Rol</string>
+    <string name="submit_contributor_notes_hint">Notas (opcional)</string>
+    <string name="submit_samples_title">Samples</string>
+    <string name="submit_add_sample">Añadir sample</string>
+    <string name="submit_sample_track_hint">Canción muestreada</string>
+    <string name="submit_sample_notes_hint">Notas (opcional)</string>
+    <string name="submit_remove_item">Quitar</string>
+    <string name="detail_contributors_title">Contribuyentes</string>
+    <string name="detail_samples_title">Samples</string>
+    <string name="detail_label_credit">© %1$s</string>
     <string name="submit_artist_hint">Artista</string>
     <string name="submit_album_title_hint">Título del álbum</string>
     <string name="submit_track_title_hint">Título de la canción</string>

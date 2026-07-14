@@ -12,6 +12,7 @@ from app.routers import (
     feed,
     follows,
     health,
+    labels,
     lists,
     moderation,
     profiles,
@@ -58,6 +59,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(profiles.router)
 app.include_router(catalog.router)
+app.include_router(labels.router)
 app.include_router(moderation.router)
 app.include_router(ratings.router)
 app.include_router(feed.router)

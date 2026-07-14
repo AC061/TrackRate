@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.trackrate.ModerationReviewActivity
 import com.example.trackrate.databinding.ActivityModerationBinding
 import com.example.trackrate.domain.model.CatalogSubmission
 import com.example.trackrate.ui.moderation.ModerationAdapter
@@ -27,6 +28,9 @@ class ModerationActivity : AppCompatActivity() {
     private val viewModel: ModerationViewModel by viewModels()
     private val adapter by lazy {
         ModerationAdapter(
+            onReview = { item ->
+                startActivity(ModerationReviewActivity.newIntent(this, item.type, item.id))
+            },
             onApprove = { item -> viewModel.approve(item.type, item.id) },
             onReject = { item -> showRejectDialog(item) }
         )

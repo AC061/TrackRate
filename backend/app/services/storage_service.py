@@ -71,6 +71,25 @@ def ensure_buckets() -> None:
         client.set_bucket_policy(bucket, _public_read_policy(bucket))
 
 
+LEGACY_MEDIA_BASES = (
+    "http://localhost:9000",
+    "http://127.0.0.1:9000",
+    "http://minio:9000",
+)
+
+
+def normalize_stored_media_url(url: str | None) -> str | None:
+    if not url:
+        return None
+
+    desired_base = settings.minio_public_url.rstrip("/")
+    for legacy_base in LEGACY_MEDIA_BASES:
+        prefix = f"{legacy_base}/"
+        if url.startswith(prefix):
+            return f"{desired_base}/{url[len(prefix):]}"
+    return url
+
+
 def build_public_url(bucket: str, object_key: str) -> str:
     base = settings.minio_public_url.rstrip("/")
     return f"{base}/{bucket}/{object_key}"

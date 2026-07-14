@@ -6,11 +6,26 @@ from sqlalchemy import select
 
 from app.core.security import hash_password
 from app.db.session import SessionLocal
-from app.models import Album, Artist, ModerationStatus, Profile, Track, User
+from app.models import (
+    Album,
+    Artist,
+    CatalogContributor,
+    ContributorRole,
+    ModerationStatus,
+    MusicEntityType,
+    Profile,
+    RecordLabel,
+    Track,
+    TrackSample,
+    User,
+)
 
 ADMIN_ID = UUID("a0000000-0000-4000-8000-000000000001")
 ADMIN_EMAIL = "admin@trackrate.dev"
 ADMIN_PASSWORD = "TrackRateAdmin123!"
+
+LABEL_PARLOPHONE = UUID("b0000001-0000-4000-8000-000000000001")
+LABEL_ONE_LITTLE = UUID("b0000001-0000-4000-8000-000000000002")
 
 
 def seed() -> None:
@@ -35,6 +50,13 @@ def seed() -> None:
         )
         db.add(user)
         db.add(profile)
+        db.flush()
+
+        labels = [
+            RecordLabel(id=LABEL_PARLOPHONE, name="Parlophone"),
+            RecordLabel(id=LABEL_ONE_LITTLE, name="One Little Independent"),
+        ]
+        db.add_all(labels)
         db.flush()
 
         artists = [
@@ -64,6 +86,8 @@ def seed() -> None:
                 title="OK Computer",
                 artist_id=artists[0].id,
                 release_year=1997,
+                description="Tercer álbum de estudio de Radiohead, considerado una obra maestra del rock alternativo.",
+                label_id=LABEL_PARLOPHONE,
                 submitted_by=ADMIN_ID,
                 status=ModerationStatus.APPROVED,
                 reviewed_by=ADMIN_ID,
@@ -73,6 +97,8 @@ def seed() -> None:
                 title="Vespertine",
                 artist_id=artists[1].id,
                 release_year=2001,
+                description="Cuarto álbum de Bjork, con microbeats y arreglos íntimos.",
+                label_id=LABEL_ONE_LITTLE,
                 submitted_by=ADMIN_ID,
                 status=ModerationStatus.APPROVED,
                 reviewed_by=ADMIN_ID,
@@ -88,6 +114,8 @@ def seed() -> None:
                 album_id=albums[0].id,
                 artist_id=artists[0].id,
                 duration_ms=383000,
+                description="Canción en varias secciones que mezcla rock alternativo y atmósferas densas.",
+                label_id=LABEL_PARLOPHONE,
                 submitted_by=ADMIN_ID,
                 status=ModerationStatus.APPROVED,
                 reviewed_by=ADMIN_ID,
@@ -98,12 +126,35 @@ def seed() -> None:
                 album_id=albums[1].id,
                 artist_id=artists[1].id,
                 duration_ms=337000,
+                description="Apertura etérea de Vespertine con capas vocales superpuestas.",
+                label_id=LABEL_ONE_LITTLE,
                 submitted_by=ADMIN_ID,
                 status=ModerationStatus.APPROVED,
                 reviewed_by=ADMIN_ID,
             ),
         ]
         db.add_all(tracks)
+        db.flush()
+
+        db.add(
+            CatalogContributor(
+                entity_type=MusicEntityType.ALBUM,
+                entity_id=albums[0].id,
+                artist_id=artists[1].id,
+                role=ContributorRole.PRODUCER,
+                notes="Colaboración conceptual en preproducción",
+                sort_order=0,
+            )
+        )
+        db.add(
+            TrackSample(
+                track_id=tracks[0].id,
+                sampled_track_id=tracks[1].id,
+                notes="Referencia atmosférica en la sección intermedia",
+                sort_order=0,
+            )
+        )
+
         db.commit()
         print(f"Seed OK: {ADMIN_EMAIL} / {ADMIN_PASSWORD}")
     finally:

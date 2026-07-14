@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
-from app.deps.auth import get_current_user
+from app.deps.auth import get_current_user_with_profile
 from app.models import User
 from app.schemas.catalog import (
     CatalogDetailResponse,
@@ -12,6 +12,7 @@ from app.schemas.catalog import (
     SubmitAlbumRequest,
     SubmitArtistRequest,
     SubmitTrackRequest,
+    TopRatedTrackResponse,
 )
 from app.schemas.social import RatingStatsResponse
 from app.services import catalog_service, rating_service
@@ -26,6 +27,14 @@ def search_catalog(
     db: Session = Depends(get_db),
 ) -> list[CatalogItemResponse]:
     return catalog_service.search_catalog(db, q, type)
+
+
+@router.get("/top-rated/tracks", response_model=list[TopRatedTrackResponse])
+def top_rated_tracks(
+    limit: int = Query(default=20, ge=1, le=50),
+    db: Session = Depends(get_db),
+) -> list[TopRatedTrackResponse]:
+    return catalog_service.top_rated_tracks(db, limit)
 
 
 @router.get("/artists/{artist_id}/albums", response_model=list[CatalogItemResponse])
@@ -64,43 +73,39 @@ def catalog_detail(
 @router.post("/artists", response_model=CatalogDetailResponse, status_code=201)
 def submit_artist(
     body: SubmitArtistRequest,
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user_with_profile),
     db: Session = Depends(get_db),
 ) -> CatalogDetailResponse:
     artist = catalog_service.submit_artist(db, user.id, body.name, body.bio)
-    return CatalogDetailResponse(
-        id=artist.id,
-        type="artist",
-        title=artist.name,
-        description=artist.bio,
-    )
+    return catalog_service.build_artist_detail_response(db, artist)
 
 
 @router.post("/albums", response_model=CatalogDetailResponse, status_code=201)
 def submit_album(
     body: SubmitAlbumRequest,
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user_with_profile),
     db: Session = Depends(get_db),
 ) -> CatalogDetailResponse:
     try:
         album = catalog_service.submit_album(
-            db, user.id, body.title, body.artist_id, body.release_year
+            db,
+            user.id,
+            body.title,
+            body.artist_id,
+            body.release_year,
+            body.description,
+            body.label_id,
+            body.contributors,
         )
     except catalog_service.CatalogValidationError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return CatalogDetailResponse(
-        id=album.id,
-        type="album",
-        title=album.title,
-        year=album.release_year,
-        artist_id=album.artist_id,
-    )
+    return catalog_service.build_album_detail_response(db, album)
 
 
 @router.post("/tracks", response_model=CatalogDetailResponse, status_code=201)
 def submit_track(
     body: SubmitTrackRequest,
-    user: User = Depends(get_current_user),
+    user: User = Depends(get_current_user_with_profile),
     db: Session = Depends(get_db),
 ) -> CatalogDetailResponse:
     try:
@@ -111,14 +116,11 @@ def submit_track(
             body.artist_id,
             body.album_id,
             body.duration_ms,
+            body.description,
+            body.label_id,
+            body.contributors,
+            body.samples,
         )
     except catalog_service.CatalogValidationError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return CatalogDetailResponse(
-        id=track.id,
-        type="track",
-        title=track.title,
-        duration_ms=track.duration_ms,
-        artist_id=track.artist_id,
-        album_id=track.album_id,
-    )
+    return catalog_service.build_track_detail_response(db, track)

@@ -3,6 +3,7 @@ package com.example.trackrate.data.remote.dto
 import com.example.trackrate.domain.model.ActivityFeedItem
 import com.example.trackrate.domain.model.ActivityType
 import com.example.trackrate.domain.model.ProfileStats
+import com.example.trackrate.util.MediaUrlResolver
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -33,7 +34,7 @@ data class ActivityFeedDto(
         userId = userId,
         username = username,
         displayName = displayName,
-        avatarUrl = avatarUrl,
+        avatarUrl = MediaUrlResolver.resolve(avatarUrl),
         activityType = parseActivityType(activityType),
         createdAt = createdAt,
         rating = rating,

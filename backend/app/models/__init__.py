@@ -3,6 +3,9 @@ from app.models.entities import (  # noqa: F401
     ActivityType,
     Album,
     Artist,
+    CatalogContributor,
+    ContributorRole,
+    CONTRIBUTOR_ROLE_LABELS,
     Follow,
     ListItem,
     ModerationStatus,
@@ -10,6 +13,8 @@ from app.models.entities import (  # noqa: F401
     MusicList,
     Profile,
     Rating,
+    RecordLabel,
     Track,
+    TrackSample,
     User,
 )

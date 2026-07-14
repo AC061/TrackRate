@@ -1,6 +1,7 @@
 package com.example.trackrate.data.remote.dto
 
 import com.example.trackrate.domain.model.UserProfile
+import com.example.trackrate.util.MediaUrlResolver
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,7 +19,7 @@ data class ProfileDto(
         username = username,
         displayName = displayName,
         bio = bio,
-        avatarUrl = avatarUrl,
+        avatarUrl = MediaUrlResolver.resolve(avatarUrl),
         isAdmin = isAdmin
     )
 }

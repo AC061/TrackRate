@@ -36,6 +36,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var profileRepository: ProfileRepository
 
     private var currentUsername: String? = null
+    private var isCurrentUserAdmin = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,8 +90,17 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        menu.findItem(R.id.action_moderation)?.isVisible = isCurrentUserAdmin
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_moderation -> {
+                startActivity(ModerationOptionsActivity.newIntent(this))
+                return true
+            }
             R.id.action_profile -> {
                 val username = currentUsername
                 if (username != null) {
@@ -114,7 +124,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadCurrentUsername() {
         lifecycleScope.launch {
-            currentUsername = profileRepository.getCurrentProfile()?.username
+            val profile = profileRepository.getCurrentProfile()
+            val wasAdmin = isCurrentUserAdmin
+            currentUsername = profile?.username
+            isCurrentUserAdmin = profile?.isAdmin == true
+            if (wasAdmin != isCurrentUserAdmin) {
+                invalidateOptionsMenu()
+            }
         }
     }
 

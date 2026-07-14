@@ -15,6 +15,9 @@ import com.example.trackrate.data.remote.dto.RatingDetailDto
 import com.example.trackrate.data.remote.dto.RatingDto
 import com.example.trackrate.data.remote.dto.RatingStatsDto
 import com.example.trackrate.data.remote.dto.RatingUpsertDto
+import com.example.trackrate.data.remote.dto.CreateRecordLabelDto
+import com.example.trackrate.data.remote.dto.RecordLabelDto
+import com.example.trackrate.data.remote.dto.TopRatedTrackDto
 import com.example.trackrate.data.remote.dto.RegisterRequestDto
 import com.example.trackrate.data.remote.dto.SetAdminRequestDto
 import com.example.trackrate.data.remote.dto.SubmissionDto
@@ -87,6 +90,16 @@ class TrackRateApi @Inject constructor(
 
     suspend fun getAlbumsByArtist(artistId: String): List<CatalogItemDto> =
         get("/catalog/artists/$artistId/albums")
+
+    suspend fun getTopRatedTracks(limit: Int = 20): List<TopRatedTrackDto> =
+        get("/catalog/top-rated/tracks") {
+            url.parameters.append("limit", limit.toString())
+        }
+
+    suspend fun getRecordLabels(): List<RecordLabelDto> = get("/labels")
+
+    suspend fun createRecordLabel(body: CreateRecordLabelDto): RecordLabelDto =
+        post("/admin/labels", body)
 
     suspend fun getRatingStats(type: String, id: String): RatingStatsDto? =
         get("/catalog/$type/$id/rating-stats")
@@ -163,6 +176,9 @@ class TrackRateApi @Inject constructor(
 
     suspend fun getPendingSubmissions(): List<SubmissionDto> =
         get("/admin/moderation/pending")
+
+    suspend fun getModerationDetail(type: String, id: String): CatalogDetailDto =
+        get("/admin/moderation/$type/$id")
 
     suspend fun getMySubmissions(): List<SubmissionDto> = get("/me/submissions")
 

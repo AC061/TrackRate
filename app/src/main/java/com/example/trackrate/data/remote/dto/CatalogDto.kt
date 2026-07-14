@@ -112,10 +112,26 @@ data class NewArtistDto(
 )
 
 @Serializable
+data class ContributorInputDto(
+    @SerialName("artist_id") val artistId: String,
+    @SerialName("role") val role: String,
+    @SerialName("notes") val notes: String? = null
+)
+
+@Serializable
+data class SampleInputDto(
+    @SerialName("sampled_track_id") val sampledTrackId: String,
+    @SerialName("notes") val notes: String? = null
+)
+
+@Serializable
 data class NewAlbumDto(
     @SerialName("title") val title: String,
     @SerialName("artist_id") val artistId: String,
-    @SerialName("release_year") val releaseYear: Int? = null
+    @SerialName("release_year") val releaseYear: Int? = null,
+    @SerialName("description") val description: String? = null,
+    @SerialName("label_id") val labelId: String? = null,
+    @SerialName("contributors") val contributors: List<ContributorInputDto> = emptyList()
 )
 
 @Serializable
@@ -123,5 +139,9 @@ data class NewTrackDto(
     @SerialName("title") val title: String,
     @SerialName("artist_id") val artistId: String,
     @SerialName("album_id") val albumId: String? = null,
-    @SerialName("duration_ms") val durationMs: Int? = null
+    @SerialName("duration_ms") val durationMs: Int? = null,
+    @SerialName("description") val description: String? = null,
+    @SerialName("label_id") val labelId: String? = null,
+    @SerialName("contributors") val contributors: List<ContributorInputDto> = emptyList(),
+    @SerialName("samples") val samples: List<SampleInputDto> = emptyList()
 )
