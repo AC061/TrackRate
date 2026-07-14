@@ -46,7 +46,7 @@ API_BASE_URL=http://10.0.2.2:8000
 
 Abre el proyecto en Android Studio, Sync Gradle y Run.
 
-### 3. Imágenes en emulador (opcional)
+### 3. Imágenes en emulador (recomendado)
 
 Para que avatares y portadas carguen desde MinIO, en `backend/.env`:
 
@@ -54,7 +54,24 @@ Para que avatares y portadas carguen desde MinIO, en `backend/.env`:
 MINIO_PUBLIC_URL=http://10.0.2.2:9000
 ```
 
-Reinicia el contenedor API tras cambiar `.env`.
+Reinicia el contenedor API tras cambiar `.env`:
+
+```powershell
+docker compose up -d --build api
+```
+
+## Subida de imágenes (Android)
+
+La app permite subir imágenes en estas pantallas:
+
+| Pantalla | Qué sube |
+|----------|----------|
+| **Ajustes** | Avatar de perfil |
+| **Añadir al catálogo** | Imagen opcional al enviar artista/álbum/canción |
+| **Mis envíos** | Imagen a un envío ya creado |
+| **Detalle de lista** | Portada de la lista |
+
+Formatos: JPEG, PNG, WebP (máx. 10 MB).
 
 ## Estructura del repo
 
