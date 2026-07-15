@@ -1,7 +1,13 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr, Field, field_validator
+from pydantic import (
+    BaseModel,
+    EmailStr,
+    Field,
+    field_validator,
+    model_validator,
+)
 
 from app.core.password_policy import validate_password_strength
 
@@ -21,6 +27,22 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=12, max_length=128)
+    confirm_password: str = Field(min_length=12, max_length=128)
+
+    @field_validator("new_password")
+    @classmethod
+    def validate_new_password(cls, password: str) -> str:
+        return validate_password_strength(password)
+
+    @model_validator(mode="after")
+    def validate_confirmation(self) -> "ChangePasswordRequest":
+        if self.new_password != self.confirm_password:
+            raise ValueError("Las contraseñas nuevas no coinciden")
+        return self
 
 
 class ProfileResponse(BaseModel):
