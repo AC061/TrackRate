@@ -8,7 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -23,12 +23,13 @@ import com.example.trackrate.domain.model.ContributorRole
 import com.example.trackrate.domain.model.SampleDraft
 import com.example.trackrate.ui.submit.SubmitViewModel
 import com.example.trackrate.util.ImageUriReader
+import com.example.trackrate.util.setBrandedTitle
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SubmitActivity : AppCompatActivity() {
+class SubmitActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivitySubmitBinding
     private val viewModel: SubmitViewModel by viewModels()
@@ -64,6 +65,7 @@ class SubmitActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        binding.toolbar.setBrandedTitle(R.string.submit_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 

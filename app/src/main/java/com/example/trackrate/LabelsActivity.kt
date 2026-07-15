@@ -9,7 +9,7 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,13 +20,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.trackrate.databinding.ActivityLabelsBinding
 import com.example.trackrate.domain.model.RecordLabel
 import com.example.trackrate.ui.labels.LabelsViewModel
+import com.example.trackrate.util.setBrandedTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class LabelsActivity : AppCompatActivity() {
+class LabelsActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityLabelsBinding
     private val viewModel: LabelsViewModel by viewModels()
@@ -38,6 +39,7 @@ class LabelsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        binding.toolbar.setBrandedTitle(R.string.labels_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 

@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -20,11 +20,12 @@ import com.example.trackrate.ui.moderation.ModerationReviewViewModel
 import com.example.trackrate.ui.moderation.labelRes
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ModerationReviewActivity : AppCompatActivity() {
+class ModerationReviewActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityModerationReviewBinding
     private val viewModel: ModerationReviewViewModel by viewModels()
@@ -86,7 +87,7 @@ class ModerationReviewActivity : AppCompatActivity() {
     private fun bind(detail: CatalogDetail, type: CatalogType) {
         binding.typeLabel.setText(type.labelRes())
         binding.title.text = detail.title
-        binding.toolbar.title = detail.title
+        binding.toolbar.setBrandedTitle(detail.title)
 
         val subtitleParts = buildList {
             detail.subtitle?.let { add(it) }

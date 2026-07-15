@@ -1,125 +1,40 @@
 package com.example.trackrate.ui.settings
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.trackrate.data.repository.AuthRepository
-import com.example.trackrate.data.repository.ProfileRepository
-import com.example.trackrate.data.repository.UploadRepository
-import com.example.trackrate.domain.model.UserProfile
+import com.example.trackrate.data.repository.PreferencesRepository
+import com.example.trackrate.domain.model.AccentColor
+import com.example.trackrate.domain.model.AppPreferences
+import com.example.trackrate.domain.model.AppTextSize
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
-
-data class SettingsUiState(
-    val isLoading: Boolean = true,
-    val profile: UserProfile? = null,
-    val isSaving: Boolean = false,
-    val isUploadingAvatar: Boolean = false,
-    val message: String? = null
-)
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val profileRepository: ProfileRepository,
-    private val authRepository: AuthRepository,
-    private val uploadRepository: UploadRepository
+    private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState())
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+    val preferences: StateFlow<AppPreferences> = preferencesRepository.preferences
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = preferencesRepository.current()
+        )
 
-    init {
-        loadProfile()
+    fun current(): AppPreferences = preferencesRepository.current()
+
+    fun setDarkMode(enabled: Boolean) {
+        preferencesRepository.setDarkMode(enabled)
     }
 
-    fun loadProfile() {
-        _uiState.value = _uiState.value.copy(isLoading = true)
-        viewModelScope.launch {
-            try {
-                val profile = profileRepository.getCurrentProfile()
-                _uiState.value = _uiState.value.copy(isLoading = false, profile = profile)
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = e.message ?: "No se pudo cargar el perfil"
-                )
-            }
-        }
+    fun setAccentColor(color: AccentColor) {
+        preferencesRepository.setAccentColor(color)
     }
 
-    fun uploadAvatar(uri: Uri) {
-        _uiState.value = _uiState.value.copy(isUploadingAvatar = true, message = null)
-        viewModelScope.launch {
-            try {
-                val payload = uploadRepository.readImage(uri)
-                uploadRepository.uploadAvatar(payload)
-                val profile = profileRepository.getCurrentProfile()
-                _uiState.value = _uiState.value.copy(
-                    isUploadingAvatar = false,
-                    profile = profile,
-                    message = "Foto de perfil actualizada"
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isUploadingAvatar = false,
-                    message = e.message ?: "No se pudo subir la imagen"
-                )
-            }
-        }
-    }
-
-    fun saveProfile(username: String, displayName: String, bio: String) {
-        val validationError = validateUsername(username)
-        if (validationError != null) {
-            _uiState.value = _uiState.value.copy(message = validationError)
-            return
-        }
-
-        _uiState.value = _uiState.value.copy(isSaving = true, message = null)
-        viewModelScope.launch {
-            try {
-                val updated = profileRepository.updateProfile(username, displayName, bio)
-                _uiState.value = _uiState.value.copy(
-                    isSaving = false,
-                    profile = updated,
-                    message = "Perfil actualizado"
-                )
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    isSaving = false,
-                    message = e.message ?: "No se pudo guardar el perfil"
-                )
-            }
-        }
-    }
-
-    fun signOut() {
-        viewModelScope.launch {
-            try {
-                authRepository.signOut()
-            } catch (e: Exception) {
-                _uiState.value = _uiState.value.copy(
-                    message = e.message ?: "No se pudo cerrar sesión"
-                )
-            }
-        }
-    }
-
-    fun consumeMessage() {
-        if (_uiState.value.message != null) {
-            _uiState.value = _uiState.value.copy(message = null)
-        }
-    }
-
-    private fun validateUsername(username: String): String? {
-        val trimmed = username.trim()
-        if (!Regex("^[a-z0-9_]{3,30}$").matches(trimmed)) {
-            return "El usuario debe tener 3-30 caracteres (minúsculas, números o _)"
-        }
-        return null
+    fun setTextSize(size: AppTextSize) {
+        preferencesRepository.setTextSize(size)
     }
 }

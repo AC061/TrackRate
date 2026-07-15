@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -19,11 +19,12 @@ import com.example.trackrate.domain.model.UserRatingStats
 import com.example.trackrate.ui.diary.DiaryAdapter
 import com.example.trackrate.ui.profile.ProfileViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ProfileActivity : AppCompatActivity() {
+class ProfileActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityProfileBinding
     private val viewModel: ProfileViewModel by viewModels()
@@ -47,6 +48,15 @@ class ProfileActivity : AppCompatActivity() {
         binding.listsButton.setOnClickListener {
             startActivity(ListsActivity.newIntent(this))
         }
+        binding.editProfileButton.setOnClickListener {
+            startActivity(EditProfileActivity.newIntent(this))
+        }
+        binding.submissionsButton.setOnClickListener {
+            startActivity(SubmissionsActivity.newIntent(this))
+        }
+        binding.signOutButton.setOnClickListener {
+            viewModel.signOut()
+        }
 
         val username = intent.getStringExtra(EXTRA_USERNAME).orEmpty()
         observeState()
@@ -69,6 +79,8 @@ class ProfileActivity : AppCompatActivity() {
                     binding.followButton.visibility =
                         if (state.isOwnProfile) View.GONE else View.VISIBLE
                     binding.listsButton.visibility =
+                        if (state.isOwnProfile) View.VISIBLE else View.GONE
+                    binding.ownProfileActions.visibility =
                         if (state.isOwnProfile) View.VISIBLE else View.GONE
                     binding.followButton.isEnabled = !state.isWorking
                     if (!state.isOwnProfile) {
@@ -95,7 +107,7 @@ class ProfileActivity : AppCompatActivity() {
         stats: ProfileStats?,
         ratingStats: UserRatingStats?
     ) {
-        binding.toolbar.title = "@${profile.username}"
+        binding.toolbar.setBrandedTitle("@${profile.username}")
         binding.username.text = "@${profile.username}"
         binding.displayName.text = profile.displayName ?: profile.username
         binding.displayName.visibility =
@@ -134,6 +146,11 @@ class ProfileActivity : AppCompatActivity() {
         } else {
             binding.ratingStatsCard.visibility = View.GONE
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.reload()
     }
 
     companion object {

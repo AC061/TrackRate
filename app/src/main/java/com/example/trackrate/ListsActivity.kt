@@ -7,7 +7,7 @@ import android.view.View
 import android.widget.CheckBox
 import android.widget.EditText
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -15,13 +15,14 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.trackrate.databinding.ActivityListsBinding
 import com.example.trackrate.ui.lists.ListsAdapter
 import com.example.trackrate.ui.lists.ListsViewModel
+import com.example.trackrate.util.setBrandedTitle
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ListsActivity : AppCompatActivity() {
+class ListsActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityListsBinding
     private val viewModel: ListsViewModel by viewModels()
@@ -35,6 +36,7 @@ class ListsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        binding.toolbar.setBrandedTitle(R.string.lists_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 

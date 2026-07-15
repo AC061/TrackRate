@@ -5,7 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
@@ -22,12 +22,13 @@ import com.example.trackrate.ui.detail.DetailViewModel
 import com.example.trackrate.ui.detail.SampleAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @AndroidEntryPoint
-class DetailActivity : AppCompatActivity() {
+class DetailActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     private val viewModel: DetailViewModel by viewModels()
@@ -186,7 +187,7 @@ class DetailActivity : AppCompatActivity() {
             error(placeholder)
         }
         binding.title.text = detail.title
-        binding.toolbar.title = detail.title
+        binding.toolbar.setBrandedTitle(detail.title)
 
         binding.typeLabel.setText(
             when (type) {

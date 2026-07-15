@@ -3,12 +3,13 @@ package com.example.trackrate
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.example.trackrate.ui.ThemedAppCompatActivity
 import com.example.trackrate.databinding.ActivityModerationOptionsBinding
+import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class ModerationOptionsActivity : AppCompatActivity() {
+class ModerationOptionsActivity : ThemedAppCompatActivity() {
 
     private lateinit var binding: ActivityModerationOptionsBinding
 
@@ -18,6 +19,7 @@ class ModerationOptionsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        binding.toolbar.setBrandedTitle(R.string.moderation_options_title)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
 

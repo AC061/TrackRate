@@ -117,6 +117,18 @@ class ProfileViewModel @Inject constructor(
         loadedUsername?.let { load(it) }
     }
 
+    fun signOut() {
+        viewModelScope.launch {
+            try {
+                authRepository.signOut()
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    message = e.message ?: "No se pudo cerrar sesión"
+                )
+            }
+        }
+    }
+
     fun consumeMessage() {
         if (_uiState.value.message != null) {
             _uiState.value = _uiState.value.copy(message = null)

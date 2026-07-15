@@ -15,6 +15,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
+            android:title=""
             app:popupTheme="@style/Theme.TrackRate.PopupOverlay" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -213,6 +214,41 @@
                     android:text="@string/lists_title"
                     android:visibility="gone"
                     app:icon="@drawable/ic_mdi_playlist_plus" />
+
+                <LinearLayout
+                    android:id="@+id/own_profile_actions"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/edit_profile_button"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|start"
+                        android:text="@string/profile_edit"
+                        app:icon="@drawable/ic_mdi_account" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/submissions_button"
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical|start"
+                        android:text="@string/profile_submissions"
+                        app:icon="@drawable/ic_mdi_clock_outline" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/sign_out_button"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/profile_sign_out" />
+                </LinearLayout>
 
                 <TextView
                     android:layout_width="wrap_content"

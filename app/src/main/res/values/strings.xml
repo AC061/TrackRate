@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">TrackRate</string>
+    <string name="blank" translatable="false"></string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_title">TrackRate</string>
@@ -15,7 +16,20 @@
     <string name="moderation_options_title">Opciones de moderación</string>
     <string name="moderation_options_subtitle">Herramientas de administración del catálogo y la plataforma.</string>
     <string name="settings_customization_title">Personalización</string>
-    <string name="settings_customization_coming_soon">Próximamente podrás personalizar la apariencia y el comportamiento de la app.</string>
+    <string name="settings_customization_subtitle">Personaliza la apariencia de TrackRate.</string>
+    <string name="settings_dark_mode">Modo oscuro</string>
+    <string name="settings_text_size_label">Tamaño de texto</string>
+    <string name="settings_text_size_normal">Normal</string>
+    <string name="settings_text_size_large">Grande</string>
+    <string name="settings_text_size_extra_large">Muy grande</string>
+    <string name="settings_accent_color_label">Color del tema</string>
+    <string name="settings_accent_purple">Morado</string>
+    <string name="settings_accent_blue">Azul</string>
+    <string name="settings_accent_red">Rojo</string>
+    <string name="edit_profile_title">Editar perfil</string>
+    <string name="profile_edit">Editar perfil</string>
+    <string name="profile_submissions">Mis envíos</string>
+    <string name="profile_sign_out">Cerrar sesión</string>
 
     <!-- Legacy menu ids; kept for navigation graph compatibility -->
     <string name="menu_transform">Inicio</string>

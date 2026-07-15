@@ -38,46 +38,62 @@
         <activity
             android:name=".DetailActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".SubmitActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".SubmissionsActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ModerationOptionsActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ModerationActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ModerationReviewActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".LabelsActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".AdminUsersActivity"
             android:exported="false"
+            android:label="@string/blank"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ProfileActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ListsActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
             android:name=".ListDetailActivity"
             android:exported="false"
+            android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
     </application>
 
