@@ -82,6 +82,8 @@ class EditProfileFragment : Fragment() {
         binding.saveButton.setOnClickListener {
             viewModel.saveProfile(
                 username = binding.usernameInput.text?.toString().orEmpty(),
+                firstName = binding.firstNameInput.text?.toString().orEmpty(),
+                lastName = binding.lastNameInput.text?.toString().orEmpty(),
                 displayName = binding.displayNameInput.text?.toString().orEmpty(),
                 bio = binding.bioInput.text?.toString().orEmpty()
             )
@@ -149,6 +151,12 @@ class EditProfileFragment : Fragment() {
                         }
                         if (binding.usernameInput.text.isNullOrEmpty()) {
                             binding.usernameInput.setText(profile.username)
+                        }
+                        if (binding.firstNameInput.text.isNullOrEmpty()) {
+                            binding.firstNameInput.setText(profile.firstName.orEmpty())
+                        }
+                        if (binding.lastNameInput.text.isNullOrEmpty()) {
+                            binding.lastNameInput.setText(profile.lastName.orEmpty())
                         }
                         if (binding.displayNameInput.text.isNullOrEmpty()) {
                             binding.displayNameInput.setText(profile.displayName.orEmpty())
