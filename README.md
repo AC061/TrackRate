@@ -2,10 +2,15 @@
 
 App Android tipo Letterboxd para música, con backend propio FastAPI.
 
+**Curso:** 1GS132 — Ingeniería de Desarrollo de Software Móvil  
+**Integrantes:** ver comentario ENT-1 en [`MainActivity.kt`](app/src/main/java/com/example/trackrate/MainActivity.kt)
+
 ## Arquitectura
 
 ```
-Android (Kotlin, MVVM, Hilt)
+Android (Kotlin, MVVM, Hilt, Navigation Component)
+    ├── 4 Activities: Login, Main, Detail, Submit
+    ├── Fragments: Home, Search, Diary, Profile, Moderación, Listas, …
     └── Ktor Client + JWT
             └── FastAPI (Python)
                     ├── PostgreSQL
@@ -77,12 +82,21 @@ Formatos: JPEG, PNG, WebP (máx. 10 MB).
 
 ```
 TrackRate/
-├── app/                  # Android (Kotlin)
+├── app/                  # Android (Kotlin) — 4 Activities + Fragments
 ├── backend/              # FastAPI + Alembic + Docker
 ├── docs/
+│   ├── LICENSES.md       # Licencias y atribución (checklist II)
+│   ├── ASSETS.md         # Logos e iconografía
+│   ├── icons.md          # Convención MDI
 │   └── legacy-supabase/  # Esquema Supabase archivado (referencia)
+├── logo_icon.svg         # Fuente diseño — icono
+├── logo_full.svg         # Fuente diseño — logotipo
 └── local.properties.example
 ```
+
+## Licencias y recursos de terceros
+
+Ver [`docs/LICENSES.md`](docs/LICENSES.md) para el detalle de iconos MDI, dependencias Android/backend e infraestructura Docker.
 
 ## Documentación
 

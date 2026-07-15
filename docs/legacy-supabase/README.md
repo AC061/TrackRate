@@ -19,3 +19,6 @@ El backend activo está en [`../../backend/`](../../backend/).
 
 Los archivos en `migrations/` documentan el diseño inicial del dominio. El esquema vigente
 está en `backend/alembic/versions/001_initial_schema.py`.
+
+> **Nota:** La carpeta `.temp/` (metadatos locales del CLI Supabase) no debe versionarse.
+> Está listada en `.gitignore`.

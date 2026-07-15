@@ -6,6 +6,7 @@ import com.example.trackrate.data.repository.CatalogRepository
 import com.example.trackrate.data.repository.FeedRepository
 import com.example.trackrate.domain.model.ActivityFeedItem
 import com.example.trackrate.domain.model.TopRatedTrack
+import com.example.trackrate.util.ApiErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -19,6 +20,8 @@ data class HomeUiState(
     val isLoading: Boolean = true,
     val topRated: List<TopRatedTrack> = emptyList(),
     val items: List<ActivityFeedItem> = emptyList(),
+    val loadError: String? = null,
+    val canRetry: Boolean = false,
     val message: String? = null
 )
 
@@ -32,7 +35,7 @@ class HomeViewModel @Inject constructor(
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     fun load() {
-        _uiState.value = _uiState.value.copy(isLoading = true, message = null)
+        _uiState.value = _uiState.value.copy(isLoading = true, loadError = null, canRetry = false, message = null)
         viewModelScope.launch {
             try {
                 val (topRated, feed) = coroutineScope {
@@ -46,9 +49,11 @@ class HomeViewModel @Inject constructor(
                     items = feed
                 )
             } catch (e: Exception) {
+                val mapped = ApiErrorMapper.map(e)
                 _uiState.value = HomeUiState(
                     isLoading = false,
-                    message = e.message ?: "Error al cargar el inicio"
+                    loadError = if (mapped.isUnauthorized) null else mapped.message,
+                    canRetry = !mapped.isUnauthorized
                 )
             }
         }

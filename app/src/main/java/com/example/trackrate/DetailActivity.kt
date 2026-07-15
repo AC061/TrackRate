@@ -22,6 +22,7 @@ import com.example.trackrate.ui.detail.DetailViewModel
 import com.example.trackrate.ui.detail.SampleAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
+import com.example.trackrate.ui.image.ImageZoomDialogFragment
 import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -34,6 +35,8 @@ class DetailActivity : ThemedAppCompatActivity() {
     private val viewModel: DetailViewModel by viewModels()
     private lateinit var contributorAdapter: ContributorAdapter
     private lateinit var sampleAdapter: SampleAdapter
+    private var currentCoverUrl: String? = null
+    private var currentCoverPlaceholder: Int = R.drawable.ic_mdi_album
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +65,7 @@ class DetailActivity : ThemedAppCompatActivity() {
         binding.rateButton.setOnClickListener { showRatingDialog() }
         binding.deleteRatingButton.setOnClickListener { confirmDeleteRating() }
         binding.addToListButton.setOnClickListener { showAddToListDialog() }
+        binding.cover.setOnClickListener { openCoverZoom() }
 
         observeState(type)
         viewModel.load(type, id)
@@ -160,7 +164,7 @@ class DetailActivity : ThemedAppCompatActivity() {
                 if (lists.isEmpty()) {
                     Snackbar.make(binding.root, R.string.lists_empty_create_first, Snackbar.LENGTH_LONG)
                         .setAction(R.string.lists_create) {
-                            startActivity(ListsActivity.newIntent(this@DetailActivity))
+                            startActivity(MainActivity.newIntentForLists(this@DetailActivity))
                         }
                         .show()
                     return@launch
@@ -186,6 +190,9 @@ class DetailActivity : ThemedAppCompatActivity() {
             placeholder(placeholder)
             error(placeholder)
         }
+        currentCoverUrl = detail.imageUrl
+        currentCoverPlaceholder = placeholder
+        binding.cover.contentDescription = getString(R.string.image_zoom_hint)
         binding.title.text = detail.title
         binding.toolbar.setBrandedTitle(detail.title)
 
@@ -226,6 +233,13 @@ class DetailActivity : ThemedAppCompatActivity() {
         } else {
             binding.labelCredit.visibility = View.VISIBLE
             binding.labelCredit.text = getString(R.string.detail_label_credit, detail.label)
+        }
+    }
+
+    private fun openCoverZoom() {
+        val url = currentCoverUrl
+        if (!url.isNullOrBlank()) {
+            ImageZoomDialogFragment.show(this, url, currentCoverPlaceholder)
         }
     }
 

@@ -59,7 +59,8 @@ import javax.inject.Singleton
 @Singleton
 class TrackRateApi @Inject constructor(
     private val client: HttpClient,
-    private val tokenStore: TokenStore
+    private val tokenStore: TokenStore,
+    private val unauthorizedSessionHandler: UnauthorizedSessionHandler
 ) {
     suspend fun login(identifier: String, password: String): TokenResponseDto =
         postPublic("/auth/login", LoginRequestDto(identifier, password))
@@ -318,6 +319,7 @@ class TrackRateApi @Inject constructor(
 
     private suspend fun ensureSuccess(response: HttpResponse) {
         if (response.status.isSuccess()) return
+        unauthorizedSessionHandler.handleIfUnauthorized(response.status.value)
         val raw = runCatching { response.bodyAsText() }.getOrDefault("")
         val detail = runCatching {
             kotlinx.serialization.json.Json { ignoreUnknownKeys = true }

@@ -1,71 +1,78 @@
-package com.example.trackrate
+package com.example.trackrate.ui.profile
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.viewModels
-import com.example.trackrate.ui.ThemedAppCompatActivity
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import coil.transform.CircleCropTransformation
+import com.example.trackrate.DetailActivity
+import com.example.trackrate.MainActivity
+import com.example.trackrate.R
 import com.example.trackrate.databinding.ActivityProfileBinding
 import com.example.trackrate.domain.model.ProfileStats
 import com.example.trackrate.domain.model.UserProfile
 import com.example.trackrate.domain.model.UserRatingStats
 import com.example.trackrate.ui.diary.DiaryAdapter
-import com.example.trackrate.ui.profile.ProfileViewModel
+import com.example.trackrate.ui.image.ImageZoomDialogFragment
+import com.example.trackrate.util.TrackRateNavigation
+import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.snackbar.Snackbar
-import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ProfileActivity : ThemedAppCompatActivity() {
+class ProfileFragment : Fragment() {
 
-    private lateinit var binding: ActivityProfileBinding
+    private var _binding: ActivityProfileBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
     private val ratingsAdapter = DiaryAdapter { entry ->
-        startActivity(DetailActivity.newIntent(this, entry.entityType, entry.entityId))
+        startActivity(DetailActivity.newIntent(requireContext(), entry.entityType, entry.entityId))
+    }
+    private var currentAvatarUrl: String? = null
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ActivityProfileBinding.inflate(inflater, container, false)
+        binding.root.stripAppBarFromCoordinatorRoot()
+        return binding.root
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityProfileBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
-
-        binding.ratingsRecycler.layoutManager = LinearLayoutManager(this)
+        binding.ratingsRecycler.layoutManager = LinearLayoutManager(requireContext())
         binding.ratingsRecycler.adapter = ratingsAdapter
 
         binding.followButton.setOnClickListener { viewModel.toggleFollow() }
-        binding.listsButton.setOnClickListener {
-            startActivity(ListsActivity.newIntent(this))
-        }
-        binding.editProfileButton.setOnClickListener {
-            startActivity(EditProfileActivity.newIntent(this))
-        }
-        binding.submissionsButton.setOnClickListener {
-            startActivity(SubmissionsActivity.newIntent(this))
-        }
-        binding.signOutButton.setOnClickListener {
-            viewModel.signOut()
+        binding.listsButton.setOnClickListener { TrackRateNavigation.navigateToLists(this) }
+        binding.editProfileButton.setOnClickListener { TrackRateNavigation.navigateToEditProfile(this) }
+        binding.submissionsButton.setOnClickListener { TrackRateNavigation.navigateToSubmissions(this) }
+        binding.signOutButton.setOnClickListener { viewModel.signOut() }
+        binding.avatar.setOnClickListener {
+            currentAvatarUrl?.let { url ->
+                ImageZoomDialogFragment.show(this, url, R.drawable.ic_mdi_account)
+            }
         }
 
-        val username = intent.getStringExtra(EXTRA_USERNAME).orEmpty()
+        val username = arguments?.getString(TrackRateNavigation.ARG_USERNAME).orEmpty()
         observeState()
         viewModel.load(username)
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progress.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     binding.content.visibility =
@@ -107,7 +114,7 @@ class ProfileActivity : ThemedAppCompatActivity() {
         stats: ProfileStats?,
         ratingStats: UserRatingStats?
     ) {
-        binding.toolbar.setBrandedTitle("@${profile.username}")
+        (requireActivity() as? MainActivity)?.setToolbarBrandedTitle("@${profile.username}")
         binding.username.text = "@${profile.username}"
         binding.displayName.text = profile.fullName() ?: profile.displayName ?: profile.username
         binding.displayName.visibility =
@@ -122,6 +129,8 @@ class ProfileActivity : ThemedAppCompatActivity() {
             error(R.drawable.ic_mdi_account)
             transformations(CircleCropTransformation())
         }
+        currentAvatarUrl = profile.avatarUrl
+        binding.avatar.contentDescription = getString(R.string.image_zoom_hint)
 
         binding.adminBadge.visibility = if (profile.isAdmin) View.VISIBLE else View.GONE
 
@@ -157,12 +166,8 @@ class ProfileActivity : ThemedAppCompatActivity() {
         viewModel.reload()
     }
 
-    companion object {
-        private const val EXTRA_USERNAME = "extra_username"
-
-        fun newIntent(context: Context, username: String): Intent =
-            Intent(context, ProfileActivity::class.java).apply {
-                putExtra(EXTRA_USERNAME, username)
-            }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

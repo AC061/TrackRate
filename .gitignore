@@ -14,3 +14,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Metadatos locales del CLI Supabase (legacy, no versionar)
+docs/legacy-supabase/.temp/
+docs/legacy-supabase/.branches/

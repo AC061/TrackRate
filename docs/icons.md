@@ -1,6 +1,6 @@
 # Iconografía MDI — TrackRate
 
-Todos los iconos de la app provienen de [Material Design Icons (Pictogrammers)](https://pictogrammers.com/library/mdi/).
+Todos los iconos de la app provienen de [Material Design Icons (Pictogrammers)](https://pictogrammers.com/library/mdi/), licenciados bajo [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0). Ver también [`LICENSES.md`](LICENSES.md).
 
 ## Convención
 

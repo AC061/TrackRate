@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.trackrate.data.repository.RatingRepository
 import com.example.trackrate.domain.model.DiaryEntry
+import com.example.trackrate.util.ApiErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,6 +15,8 @@ import javax.inject.Inject
 data class DiaryUiState(
     val isLoading: Boolean = true,
     val entries: List<DiaryEntry> = emptyList(),
+    val loadError: String? = null,
+    val canRetry: Boolean = false,
     val message: String? = null
 )
 
@@ -26,15 +29,22 @@ class DiaryViewModel @Inject constructor(
     val uiState: StateFlow<DiaryUiState> = _uiState.asStateFlow()
 
     fun load() {
-        _uiState.value = _uiState.value.copy(isLoading = true, message = null)
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            loadError = null,
+            canRetry = false,
+            message = null
+        )
         viewModelScope.launch {
             try {
                 val entries = ratingRepository.getMyDiary()
                 _uiState.value = DiaryUiState(isLoading = false, entries = entries)
             } catch (e: Exception) {
+                val mapped = ApiErrorMapper.map(e)
                 _uiState.value = DiaryUiState(
                     isLoading = false,
-                    message = e.message ?: "Error al cargar el diario"
+                    loadError = if (mapped.isUnauthorized) null else mapped.message,
+                    canRetry = !mapped.isUnauthorized
                 )
             }
         }

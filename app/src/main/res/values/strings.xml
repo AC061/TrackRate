@@ -71,6 +71,15 @@
     <string name="settings_save">Guardar</string>
     <string name="settings_sign_out">Cerrar sesión</string>
     <string name="settings_change_avatar">Cambiar foto de perfil</string>
+    <string name="photo_choose_source">Elegir foto de perfil</string>
+    <string name="photo_from_gallery">Galería</string>
+    <string name="photo_from_camera">Cámara</string>
+    <string name="camera_permission_rationale">TrackRate necesita acceso a la cámara para tomar tu foto de perfil.</string>
+    <string name="camera_permission_denied">No se pudo usar la cámara. Puedes elegir una imagen de la galería.</string>
+    <string name="camera_permission_settings">Activa el permiso de cámara en Ajustes del sistema para tomar fotos.</string>
+    <string name="image_zoom_content_description">Imagen ampliada. Toca para cerrar. Usa dos dedos para zoom o doble toque para ampliar.</string>
+    <string name="image_zoom_hint">Doble toque o pellizco para ampliar</string>
+    <string name="error_retry">Reintentar</string>
     <string name="edit_profile_change_password">Cambiar contraseña</string>
     <string name="change_password_title">Cambiar contraseña</string>
     <string name="change_password_current_hint">Contraseña actual</string>
