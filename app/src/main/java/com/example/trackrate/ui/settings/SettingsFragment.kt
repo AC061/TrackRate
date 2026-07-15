@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
 import com.example.trackrate.R
+import com.example.trackrate.ChangePasswordActivity
 import com.example.trackrate.SubmissionsActivity
 import com.example.trackrate.databinding.FragmentSettingsBinding
 import com.google.android.material.snackbar.Snackbar
@@ -64,6 +65,13 @@ class SettingsFragment : Fragment() {
 
         binding.submissionsButton.setOnClickListener {
             startActivity(SubmissionsActivity.newIntent(requireContext()))
+        }
+
+
+        binding.changePasswordButton.setOnClickListener {
+            startActivity(
+                ChangePasswordActivity.newIntent(requireContext())
+            )
         }
 
         observeState()

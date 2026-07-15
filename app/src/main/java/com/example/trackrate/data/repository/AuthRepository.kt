@@ -17,46 +17,119 @@ class AuthRepository @Inject constructor(
     private val tokenStore: TokenStore
 ) {
 
-    private val _sessionStatus = MutableStateFlow<SessionStatus>(SessionStatus.Initializing)
-    val sessionStatus: StateFlow<SessionStatus> = _sessionStatus.asStateFlow()
+    private val _sessionStatus =
+        MutableStateFlow<SessionStatus>(
+            SessionStatus.Initializing
+        )
+
+    val sessionStatus: StateFlow<SessionStatus> =
+        _sessionStatus.asStateFlow()
 
     val currentUserId: String?
         get() = tokenStore.getUserId()
 
     suspend fun bootstrap() {
-        if (_sessionStatus.value != SessionStatus.Initializing) return
-        val token = tokenStore.getToken()
-        if (token.isNullOrBlank()) {
-            _sessionStatus.value = SessionStatus.NotAuthenticated
+        if (
+            _sessionStatus.value !=
+            SessionStatus.Initializing
+        ) {
             return
         }
+
+        val token = tokenStore.getToken()
+
+        if (token.isNullOrBlank()) {
+            _sessionStatus.value =
+                SessionStatus.NotAuthenticated
+            return
+        }
+
         try {
             val user = api.me()
-            tokenStore.saveSession(token, user.id)
-            _sessionStatus.value = SessionStatus.Authenticated(user.id)
+
+            tokenStore.saveSession(
+                token,
+                user.id
+            )
+
+            _sessionStatus.value =
+                SessionStatus.Authenticated(
+                    user.id
+                )
         } catch (_: Exception) {
             tokenStore.clear()
-            _sessionStatus.value = SessionStatus.NotAuthenticated
+
+            _sessionStatus.value =
+                SessionStatus.NotAuthenticated
         }
     }
 
-    suspend fun signIn(email: String, password: String) {
-        val response = api.login(email.trim(), password.trim())
-        tokenStore.saveSession(response.accessToken, response.user.id)
-        _sessionStatus.value = SessionStatus.Authenticated(response.user.id)
+    suspend fun signIn(
+        email: String,
+        password: String
+    ) {
+        val response = api.login(
+            email = email.trim(),
+            password = password.trim()
+        )
+
+        tokenStore.saveSession(
+            response.accessToken,
+            response.user.id
+        )
+
+        _sessionStatus.value =
+            SessionStatus.Authenticated(
+                response.user.id
+            )
     }
 
-    suspend fun signUp(email: String, password: String) {
-        val response = api.register(email.trim(), password.trim())
-        tokenStore.saveSession(response.accessToken, response.user.id)
-        _sessionStatus.value = SessionStatus.Authenticated(response.user.id)
+    suspend fun signUp(
+        email: String,
+        password: String
+    ) {
+        val response = api.register(
+            email = email.trim(),
+            password = password.trim()
+        )
+
+        tokenStore.saveSession(
+            response.accessToken,
+            response.user.id
+        )
+
+        _sessionStatus.value =
+            SessionStatus.Authenticated(
+                response.user.id
+            )
+    }
+
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ): String {
+        val response = api.changePassword(
+            currentPassword = currentPassword,
+            newPassword = newPassword,
+            confirmPassword = confirmPassword
+        )
+
+        return response.detail
     }
 
     suspend fun signOut() {
         tokenStore.clear()
-        _sessionStatus.value = SessionStatus.NotAuthenticated
+
+        _sessionStatus.value =
+            SessionStatus.NotAuthenticated
     }
 
-    fun isUnauthorized(error: Throwable): Boolean =
-        error is ApiException && error.statusCode == HttpStatusCode.Unauthorized.value
+    fun isUnauthorized(
+        error: Throwable
+    ): Boolean {
+        return error is ApiException &&
+            error.statusCode ==
+            HttpStatusCode.Unauthorized.value
+    }
 }

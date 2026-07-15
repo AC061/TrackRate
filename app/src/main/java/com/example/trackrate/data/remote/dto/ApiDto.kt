@@ -43,6 +43,22 @@ data class RegisterRequestDto(
 )
 
 @Serializable
+data class ChangePasswordRequestDto(
+    @SerialName("current_password")
+    val currentPassword: String,
+
+    @SerialName("new_password")
+    val newPassword: String,
+
+    @SerialName("confirm_password")
+    val confirmPassword: String
+)
+
+@Serializable
+data class MessageResponseDto(
+    val detail: String
+)
+@Serializable
 data class TokenResponseDto(
     @SerialName("access_token") val accessToken: String,
     @SerialName("token_type") val tokenType: String = "bearer",

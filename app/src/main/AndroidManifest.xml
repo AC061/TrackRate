@@ -36,6 +36,10 @@
             android:theme="@style/Theme.TrackRate.NoActionBar"
             tools:targetApi="24" />
         <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
             android:name=".DetailActivity"
             android:exported="false"
             android:theme="@style/Theme.TrackRate.NoActionBar" />

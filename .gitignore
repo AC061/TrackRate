@@ -14,3 +14,11 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Respaldos locales y archivos del IDE
+*.backup
+*.backup-*
+*.bak
+*~
+backups/
+.idea/markdown.xml

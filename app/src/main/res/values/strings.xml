@@ -184,4 +184,14 @@
     <string name="lists_public">Pública</string>
     <string name="lists_title_required">El título es obligatorio</string>
     <string name="lists_add_to">Añadir a lista</string>
+
+    <string name="change_password_title">Cambiar contraseña</string>
+    <string name="change_password_description">Introduce tu contraseña actual y una nueva contraseña segura.</string>
+    <string name="change_password_current_hint">Contraseña actual</string>
+    <string name="change_password_new_hint">Nueva contraseña</string>
+    <string name="change_password_confirm_hint">Confirmar nueva contraseña</string>
+    <string name="change_password_action">Actualizar contraseña</string>
+    <string name="change_password_cancel">Cancelar</string>
+    <string name="change_password_success_title">Cambio completado</string>
+
 </resources>
