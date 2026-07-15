@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.trackrate.data.remote.ApiException
 import com.example.trackrate.data.repository.AuthRepository
 import com.example.trackrate.domain.model.SessionStatus
+import com.example.trackrate.util.ApiErrorMapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -114,26 +115,9 @@ class AuthViewModel @Inject constructor(
                     "Email o contraseña incorrectos"
                 HttpStatusCode.Conflict.value ->
                     "Este email ya está registrado"
-                else -> e.message.ifBlank { "Error de autenticación" }
+                else -> ApiErrorMapper.map(e).message
             }
         }
-
-        val messages = buildList {
-            var current: Throwable? = e
-            while (current != null) {
-                current.message?.let { add(it) }
-                current = current.cause
-            }
-        }.joinToString(" ")
-
-        return when {
-            messages.contains("Connect timeout", ignoreCase = true) ||
-                messages.contains("Unable to resolve host", ignoreCase = true) ||
-                messages.contains("Network is unreachable", ignoreCase = true) ||
-                messages.contains("Failed to connect", ignoreCase = true) ->
-                "No se pudo conectar con el servidor. Comprueba que la API esté en marcha."
-            messages.isNotBlank() -> messages
-            else -> "Error de autenticación"
-        }
+        return ApiErrorMapper.map(e).message
     }
 }

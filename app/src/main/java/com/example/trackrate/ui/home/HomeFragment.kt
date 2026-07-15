@@ -14,6 +14,7 @@ import com.example.trackrate.DetailActivity
 import com.example.trackrate.databinding.FragmentHomeBinding
 import com.example.trackrate.domain.model.CatalogType
 import com.example.trackrate.util.TrackRateNavigation
+import com.example.trackrate.util.bindLoadError
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -64,12 +65,31 @@ class HomeFragment : Fragment() {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progress.visibility = if (state.isLoading) View.VISIBLE else View.GONE
+                    val hasLoadError = !state.loadError.isNullOrBlank()
+                    binding.loadError.bindLoadError(
+                        errorMessage = state.loadError,
+                        showRetry = state.canRetry,
+                        onRetry = viewModel::load
+                    )
+                    binding.topRatedSection.visibility =
+                        if (hasLoadError) View.GONE else View.VISIBLE
+                    binding.recycler.visibility = if (hasLoadError) View.GONE else View.VISIBLE
+                    binding.emptyView.visibility =
+                        if (!state.isLoading && !hasLoadError && state.items.isEmpty()) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
+
                     topRatedAdapter.submitList(state.topRated)
                     binding.topRatedEmpty.visibility =
-                        if (!state.isLoading && state.topRated.isEmpty()) View.VISIBLE else View.GONE
+                        if (!state.isLoading && !hasLoadError && state.topRated.isEmpty()) {
+                            View.VISIBLE
+                        } else {
+                            View.GONE
+                        }
                     feedAdapter.submitList(state.items)
-                    binding.emptyView.visibility =
-                        if (!state.isLoading && state.items.isEmpty()) View.VISIBLE else View.GONE
+
                     state.message?.let {
                         Snackbar.make(binding.root, it, Snackbar.LENGTH_LONG).show()
                         viewModel.consumeMessage()

@@ -20,6 +20,7 @@ import com.example.trackrate.domain.model.ProfileStats
 import com.example.trackrate.domain.model.UserProfile
 import com.example.trackrate.domain.model.UserRatingStats
 import com.example.trackrate.ui.diary.DiaryAdapter
+import com.example.trackrate.ui.image.ImageZoomDialogFragment
 import com.example.trackrate.util.TrackRateNavigation
 import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.snackbar.Snackbar
@@ -35,6 +36,7 @@ class ProfileFragment : Fragment() {
     private val ratingsAdapter = DiaryAdapter { entry ->
         startActivity(DetailActivity.newIntent(requireContext(), entry.entityType, entry.entityId))
     }
+    private var currentAvatarUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -57,6 +59,11 @@ class ProfileFragment : Fragment() {
         binding.editProfileButton.setOnClickListener { TrackRateNavigation.navigateToEditProfile(this) }
         binding.submissionsButton.setOnClickListener { TrackRateNavigation.navigateToSubmissions(this) }
         binding.signOutButton.setOnClickListener { viewModel.signOut() }
+        binding.avatar.setOnClickListener {
+            currentAvatarUrl?.let { url ->
+                ImageZoomDialogFragment.show(this, url, R.drawable.ic_mdi_account)
+            }
+        }
 
         val username = arguments?.getString(TrackRateNavigation.ARG_USERNAME).orEmpty()
         observeState()
@@ -118,6 +125,8 @@ class ProfileFragment : Fragment() {
             error(R.drawable.ic_mdi_account)
             transformations(CircleCropTransformation())
         }
+        currentAvatarUrl = profile.avatarUrl
+        binding.avatar.contentDescription = getString(R.string.image_zoom_hint)
 
         binding.adminBadge.visibility = if (profile.isAdmin) View.VISIBLE else View.GONE
 

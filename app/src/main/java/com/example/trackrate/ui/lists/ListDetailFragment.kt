@@ -15,7 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
 import com.example.trackrate.DetailActivity
 import com.example.trackrate.MainActivity
+import com.example.trackrate.R
 import com.example.trackrate.databinding.ActivityListDetailBinding
+import com.example.trackrate.ui.image.ImageZoomDialogFragment
 import com.example.trackrate.util.TrackRateNavigation
 import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.snackbar.Snackbar
@@ -35,6 +37,7 @@ class ListDetailFragment : Fragment() {
     private val pickCover = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) viewModel.uploadCover(uri)
     }
+    private var currentCoverUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,6 +55,11 @@ class ListDetailFragment : Fragment() {
         binding.recycler.layoutManager = LinearLayoutManager(requireContext())
         binding.recycler.adapter = adapter
         binding.uploadCoverButton.setOnClickListener { pickCover.launch("image/*") }
+        binding.cover.setOnClickListener {
+            currentCoverUrl?.let { url ->
+                ImageZoomDialogFragment.show(this, url, R.drawable.ic_mdi_album)
+            }
+        }
 
         val listId = arguments?.getString(TrackRateNavigation.ARG_LIST_ID).orEmpty()
         val listTitle = arguments?.getString(TrackRateNavigation.ARG_LIST_TITLE).orEmpty()
@@ -74,6 +82,8 @@ class ListDetailFragment : Fragment() {
                     if (state.coverUrl != null) {
                         binding.cover.visibility = View.VISIBLE
                         binding.cover.load(state.coverUrl)
+                        currentCoverUrl = state.coverUrl
+                        binding.cover.contentDescription = getString(R.string.image_zoom_hint)
                     }
 
                     binding.uploadCoverButton.isEnabled = !state.isUploadingCover
