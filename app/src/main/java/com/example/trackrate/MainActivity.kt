@@ -1,15 +1,16 @@
 package com.example.trackrate
 
 /**
- * ENT-1 (1GS132 — Ingeniería de Desarrollo de Software Móvil)
+ * (1GS132 — Desarrollo de Software VI)
  *
- * Integrantes del equipo (completar nombre completo y cédula antes de la entrega):
- * 1. [Nombre Apellido Apellido] — C.C. [0000000000]
- * 2. [Nombre Apellido Apellido] — C.C. [0000000000]
- * 3. [Nombre Apellido Apellido] — C.C. [0000000000]  (opcional, si aplica)
+ * Integrantes del equipo:
+ * 1. Leonardo Castro — 8-1032-1264
+ * 2. Jorge Sarmiento — 3-757-1758
+ * 3. Mariam Harris — 1-756-2331
  *
- * Curso: 1GS132 | Proyecto: TrackRate
+ * Proyecto Final: TrackRate
  */
+
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
