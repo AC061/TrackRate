@@ -31,7 +31,7 @@ class LoginActivity : ThemedAppCompatActivity() {
 
         binding.submitButton.setOnClickListener {
             viewModel.submit(
-                email = binding.emailInput.text?.toString().orEmpty(),
+                identifier = binding.emailInput.text?.toString().orEmpty(),
                 password = binding.passwordInput.text?.toString().orEmpty(),
                 confirmPassword = binding.confirmPasswordInput.text?.toString().orEmpty()
             )
@@ -63,6 +63,14 @@ class LoginActivity : ThemedAppCompatActivity() {
                     binding.toggleModeButton.setText(
                         if (isRegister) R.string.auth_toggle_to_login else R.string.auth_toggle_to_register
                     )
+                    binding.emailLayout.hint = getString(
+                        if (isRegister) R.string.auth_email_hint else R.string.auth_identifier_hint
+                    )
+                    binding.emailInput.inputType = if (isRegister) {
+                        android.text.InputType.TYPE_CLASS_TEXT or android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS
+                    } else {
+                        android.text.InputType.TYPE_CLASS_TEXT
+                    }
 
                     binding.progress.visibility =
                         if (state.isLoading) android.view.View.VISIBLE else android.view.View.GONE

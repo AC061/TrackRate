@@ -44,6 +44,8 @@ def seed() -> None:
         profile = Profile(
             id=ADMIN_ID,
             username="admin",
+            first_name="TrackRate",
+            last_name="Admin",
             display_name="TrackRate Admin",
             bio="Cuenta administrador de desarrollo.",
             is_admin=True,

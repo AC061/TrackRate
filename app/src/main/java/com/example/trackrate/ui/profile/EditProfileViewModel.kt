@@ -70,8 +70,14 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    fun saveProfile(username: String, displayName: String, bio: String) {
-        val validationError = validateUsername(username)
+    fun saveProfile(
+        username: String,
+        firstName: String,
+        lastName: String,
+        displayName: String,
+        bio: String
+    ) {
+        val validationError = validate(username, firstName, lastName)
         if (validationError != null) {
             _uiState.value = _uiState.value.copy(message = validationError)
             return
@@ -80,7 +86,13 @@ class EditProfileViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(isSaving = true, message = null)
         viewModelScope.launch {
             try {
-                val updated = profileRepository.updateProfile(username, displayName, bio)
+                val updated = profileRepository.updateProfile(
+                    username = username,
+                    firstName = firstName,
+                    lastName = lastName,
+                    displayName = displayName,
+                    bio = bio
+                )
                 _uiState.value = _uiState.value.copy(
                     isSaving = false,
                     profile = updated,
@@ -101,10 +113,16 @@ class EditProfileViewModel @Inject constructor(
         }
     }
 
-    private fun validateUsername(username: String): String? {
+    private fun validate(username: String, firstName: String, lastName: String): String? {
         val trimmed = username.trim()
         if (!Regex("^[a-z0-9_]{3,30}$").matches(trimmed)) {
             return "El usuario debe tener 3-30 caracteres (minúsculas, números o _)"
+        }
+        if (firstName.trim().isEmpty()) {
+            return "El nombre es obligatorio"
+        }
+        if (lastName.trim().isEmpty()) {
+            return "El apellido es obligatorio"
         }
         return null
     }

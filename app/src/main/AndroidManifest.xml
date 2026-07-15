@@ -81,6 +81,11 @@
             android:label="@string/blank"
             android:theme="@style/Theme.TrackRate.NoActionBar" />
         <activity
+            android:name=".ChangePasswordActivity"
+            android:exported="false"
+            android:label="@string/blank"
+            android:theme="@style/Theme.TrackRate.NoActionBar" />
+        <activity
             android:name=".ProfileActivity"
             android:exported="false"
             android:label="@string/blank"

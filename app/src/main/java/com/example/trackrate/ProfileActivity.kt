@@ -109,9 +109,13 @@ class ProfileActivity : ThemedAppCompatActivity() {
     ) {
         binding.toolbar.setBrandedTitle("@${profile.username}")
         binding.username.text = "@${profile.username}"
-        binding.displayName.text = profile.displayName ?: profile.username
+        binding.displayName.text = profile.fullName() ?: profile.displayName ?: profile.username
         binding.displayName.visibility =
-            if (profile.displayName.isNullOrBlank()) View.GONE else View.VISIBLE
+            if (profile.fullName().isNullOrBlank() && profile.displayName.isNullOrBlank()) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
 
         binding.avatar.load(profile.avatarUrl) {
             placeholder(R.drawable.ic_mdi_account)

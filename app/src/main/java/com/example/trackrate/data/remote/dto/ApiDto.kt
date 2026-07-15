@@ -32,7 +32,7 @@ data class UploadResponseDto(
 
 @Serializable
 data class LoginRequestDto(
-    @SerialName("email") val email: String,
+    @SerialName("identifier") val identifier: String,
     @SerialName("password") val password: String
 )
 

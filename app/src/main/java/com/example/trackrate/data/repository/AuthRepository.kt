@@ -40,8 +40,8 @@ class AuthRepository @Inject constructor(
         }
     }
 
-    suspend fun signIn(email: String, password: String) {
-        val response = api.login(email.trim(), password.trim())
+    suspend fun signIn(identifier: String, password: String) {
+        val response = api.login(identifier.trim(), password.trim())
         tokenStore.saveSession(response.accessToken, response.user.id)
         _sessionStatus.value = SessionStatus.Authenticated(response.user.id)
     }
@@ -50,6 +50,18 @@ class AuthRepository @Inject constructor(
         val response = api.register(email.trim(), password.trim())
         tokenStore.saveSession(response.accessToken, response.user.id)
         _sessionStatus.value = SessionStatus.Authenticated(response.user.id)
+    }
+
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ) {
+        api.changePassword(
+            currentPassword = currentPassword.trim(),
+            newPassword = newPassword.trim(),
+            confirmPassword = confirmPassword.trim()
+        )
     }
 
     suspend fun signOut() {

@@ -96,6 +96,8 @@ class Profile(Base):
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
     username: Mapped[str] = mapped_column(String(30), unique=True, nullable=False, index=True)
+    first_name: Mapped[str] = mapped_column(String(100), default="", nullable=False)
+    last_name: Mapped[str] = mapped_column(String(100), default="", nullable=False)
     display_name: Mapped[str | None] = mapped_column(String(100))
     bio: Mapped[str | None] = mapped_column(Text)
     avatar_url: Mapped[str | None] = mapped_column(Text)

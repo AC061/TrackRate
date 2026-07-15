@@ -8,6 +8,7 @@ from app.schemas.auth import ProfileResponse, ProfileUpdateRequest
 from app.schemas.mappers import to_profile_response
 from app.services.profile_service import (
     ProfileNotFoundError,
+    ProfileValidationError,
     UsernameTakenError,
     get_profile_by_username,
     update_profile,
@@ -36,9 +37,13 @@ def patch_my_profile(
             db,
             user.id,
             body.username,
+            body.first_name,
+            body.last_name,
             body.display_name,
             body.bio,
         )
     except UsernameTakenError as exc:
         raise HTTPException(409, str(exc)) from exc
+    except ProfileValidationError as exc:
+        raise HTTPException(400, str(exc)) from exc
     return to_profile_response(profile)

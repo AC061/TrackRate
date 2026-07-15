@@ -54,6 +54,8 @@ def register_user(db: Session, email: str, password: str) -> User:
     profile = Profile(
         id=user_id,
         username=username,
+        first_name="",
+        last_name="",
         display_name=username,
     )
     db.add(user)
@@ -63,12 +65,27 @@ def register_user(db: Session, email: str, password: str) -> User:
     return user
 
 
-def authenticate_user(db: Session, email: str, password: str) -> User:
-    normalized_email = email.strip().lower()
-    user = db.scalar(select(User).where(User.email == normalized_email))
+def authenticate_user(db: Session, identifier: str, password: str) -> User:
+    normalized = identifier.strip()
+    if "@" in normalized:
+        user = db.scalar(select(User).where(User.email == normalized.lower()))
+    else:
+        profile = db.scalar(select(Profile).where(Profile.username == normalized.lower()))
+        user = db.get(User, profile.id) if profile else None
+
     if user is None or not verify_password(password, user.password_hash):
-        raise InvalidCredentialsError("Email o contraseña incorrectos")
+        raise InvalidCredentialsError("Usuario o correo y contraseña incorrectos")
     return user
+
+
+def change_password(db: Session, user_id: UUID, current_password: str, new_password: str) -> None:
+    user = db.get(User, user_id)
+    if user is None:
+        raise InvalidCredentialsError("Usuario no encontrado")
+    if not verify_password(current_password, user.password_hash):
+        raise InvalidCredentialsError("Contraseña actual incorrecta")
+    user.password_hash = hash_password(new_password)
+    db.commit()
 
 
 def get_user_by_id(db: Session, user_id: UUID) -> User | None:

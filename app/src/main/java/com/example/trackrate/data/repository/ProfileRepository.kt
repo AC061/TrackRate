@@ -49,12 +49,16 @@ class ProfileRepository @Inject constructor(
 
     suspend fun updateProfile(
         username: String,
+        firstName: String,
+        lastName: String,
         displayName: String?,
         bio: String?
     ): UserProfile {
         return api.updateProfile(
             ProfileUpdateDto(
                 username = username.trim(),
+                firstName = firstName.trim(),
+                lastName = lastName.trim(),
                 displayName = displayName?.trim()?.ifBlank { null },
                 bio = bio?.trim()?.ifBlank { null }
             )

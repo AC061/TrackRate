@@ -7,7 +7,9 @@ import com.example.trackrate.data.remote.dto.ApiErrorDto
 import com.example.trackrate.data.remote.dto.CatalogDetailDto
 import com.example.trackrate.data.remote.dto.CatalogItemDto
 import com.example.trackrate.data.remote.dto.CreateListRequestDto
+import com.example.trackrate.data.remote.dto.ChangePasswordRequestDto
 import com.example.trackrate.data.remote.dto.LoginRequestDto
+import com.example.trackrate.data.remote.dto.MessageResponseDto
 import com.example.trackrate.data.remote.dto.ModerationActionDto
 import com.example.trackrate.data.remote.dto.ProfileDto
 import com.example.trackrate.data.remote.dto.ProfileUpdateDto
@@ -59,11 +61,25 @@ class TrackRateApi @Inject constructor(
     private val client: HttpClient,
     private val tokenStore: TokenStore
 ) {
-    suspend fun login(email: String, password: String): TokenResponseDto =
-        postPublic("/auth/login", LoginRequestDto(email, password))
+    suspend fun login(identifier: String, password: String): TokenResponseDto =
+        postPublic("/auth/login", LoginRequestDto(identifier, password))
 
     suspend fun register(email: String, password: String): TokenResponseDto =
         postPublic("/auth/register", RegisterRequestDto(email, password))
+
+    suspend fun changePassword(
+        currentPassword: String,
+        newPassword: String,
+        confirmPassword: String
+    ): MessageResponseDto =
+        post(
+            "/auth/me/change-password",
+            ChangePasswordRequestDto(
+                currentPassword = currentPassword,
+                newPassword = newPassword,
+                confirmPassword = confirmPassword
+            )
+        )
 
     suspend fun me(): UserResponseDto = get("/auth/me")
 

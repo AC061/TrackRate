@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.trackrate.data.remote.ApiException
 import com.example.trackrate.data.repository.AuthRepository
 import com.example.trackrate.domain.model.SessionStatus
+import com.example.trackrate.util.PasswordValidator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -53,8 +54,8 @@ class AuthViewModel @Inject constructor(
         _uiState.value = AuthUiState(mode = newMode)
     }
 
-    fun submit(email: String, password: String, confirmPassword: String) {
-        val validationError = validate(email, password, confirmPassword, _uiState.value.mode)
+    fun submit(identifier: String, password: String, confirmPassword: String) {
+        val validationError = validate(identifier, password, confirmPassword, _uiState.value.mode)
         if (validationError != null) {
             _uiState.value = _uiState.value.copy(errorMessage = validationError)
             return
@@ -65,11 +66,11 @@ class AuthViewModel @Inject constructor(
             try {
                 when (_uiState.value.mode) {
                     AuthMode.LOGIN -> {
-                        authRepository.signIn(email, password)
+                        authRepository.signIn(identifier, password)
                         _events.emit(AuthEvent.LoginSuccess)
                     }
                     AuthMode.REGISTER -> {
-                        authRepository.signUp(email, password)
+                        authRepository.signUp(identifier, password)
                         _events.emit(AuthEvent.RegisterSuccess)
                     }
                 }
@@ -90,19 +91,32 @@ class AuthViewModel @Inject constructor(
     }
 
     private fun validate(
-        email: String,
+        identifier: String,
         password: String,
         confirmPassword: String,
         mode: AuthMode
     ): String? {
-        if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
-            return "Introduce un email válido"
-        }
-        if (password.length < 6) {
-            return "La contraseña debe tener al menos 6 caracteres"
-        }
-        if (mode == AuthMode.REGISTER && password != confirmPassword) {
-            return "Las contraseñas no coinciden"
+        val trimmedIdentifier = identifier.trim()
+        when (mode) {
+            AuthMode.LOGIN -> {
+                if (trimmedIdentifier.isBlank()) {
+                    return "Introduce tu usuario o correo"
+                }
+                if (password.isBlank()) {
+                    return "Introduce tu contraseña"
+                }
+            }
+            AuthMode.REGISTER -> {
+                if (trimmedIdentifier.isBlank() ||
+                    !android.util.Patterns.EMAIL_ADDRESS.matcher(trimmedIdentifier).matches()
+                ) {
+                    return "Introduce un email válido"
+                }
+                PasswordValidator.validate(password)?.let { return it }
+                if (password != confirmPassword) {
+                    return "Las contraseñas no coinciden"
+                }
+            }
         }
         return null
     }
@@ -111,7 +125,7 @@ class AuthViewModel @Inject constructor(
         if (e is ApiException) {
             return when (e.statusCode) {
                 HttpStatusCode.Unauthorized.value ->
-                    "Email o contraseña incorrectos"
+                    "Usuario o correo y contraseña incorrectos"
                 HttpStatusCode.Conflict.value ->
                     "Este email ya está registrado"
                 else -> e.message.ifBlank { "Error de autenticación" }

@@ -55,18 +55,28 @@
     <string name="auth_toggle_to_register">¿No tienes cuenta? Regístrate</string>
     <string name="auth_toggle_to_login">¿Ya tienes cuenta? Inicia sesión</string>
     <string name="auth_email_hint">Email</string>
+    <string name="auth_identifier_hint">Usuario o correo</string>
     <string name="auth_password_hint">Contraseña</string>
     <string name="auth_confirm_password_hint">Confirmar contraseña</string>
+    <string name="auth_password_requirements">La contraseña debe tener al menos 12 caracteres e incluir letra, número y carácter especial.</string>
 
     <!-- Settings / Perfil -->
     <string name="settings_profile_title">Tu perfil</string>
     <string name="settings_admin_badge">Administrador</string>
     <string name="settings_username_hint">Nombre de usuario</string>
-    <string name="settings_display_name_hint">Nombre para mostrar</string>
+    <string name="settings_first_name_hint">Nombre</string>
+    <string name="settings_last_name_hint">Apellido</string>
+    <string name="settings_display_name_hint">Nombre para mostrar (opcional)</string>
     <string name="settings_bio_hint">Biografía</string>
     <string name="settings_save">Guardar</string>
     <string name="settings_sign_out">Cerrar sesión</string>
     <string name="settings_change_avatar">Cambiar foto de perfil</string>
+    <string name="edit_profile_change_password">Cambiar contraseña</string>
+    <string name="change_password_title">Cambiar contraseña</string>
+    <string name="change_password_current_hint">Contraseña actual</string>
+    <string name="change_password_new_hint">Nueva contraseña</string>
+    <string name="change_password_confirm_hint">Confirmar nueva contraseña</string>
+    <string name="change_password_action">Actualizar contraseña</string>
 
     <!-- Uploads -->
     <string name="upload_pick_image">Seleccionar imagen</string>
