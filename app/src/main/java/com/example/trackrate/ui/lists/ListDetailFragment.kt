@@ -1,64 +1,67 @@
-package com.example.trackrate
+package com.example.trackrate.ui.lists
 
-import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
-import com.example.trackrate.ui.ThemedAppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import coil.load
+import com.example.trackrate.DetailActivity
+import com.example.trackrate.MainActivity
 import com.example.trackrate.databinding.ActivityListDetailBinding
-import com.example.trackrate.ui.lists.ListDetailViewModel
-import com.example.trackrate.ui.lists.ListItemsAdapter
+import com.example.trackrate.util.TrackRateNavigation
+import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.snackbar.Snackbar
-import com.example.trackrate.util.setBrandedTitle
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ListDetailActivity : ThemedAppCompatActivity() {
+class ListDetailFragment : Fragment() {
 
-    private lateinit var binding: ActivityListDetailBinding
+    private var _binding: ActivityListDetailBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: ListDetailViewModel by viewModels()
     private val adapter = ListItemsAdapter { item ->
-        startActivity(DetailActivity.newIntent(this, item.entityType, item.entityId))
+        startActivity(DetailActivity.newIntent(requireContext(), item.entityType, item.entityId))
     }
 
     private val pickCover = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) viewModel.uploadCover(uri)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityListDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ActivityListDetailBinding.inflate(inflater, container, false)
+        binding.root.stripAppBarFromCoordinatorRoot()
+        return binding.root
+    }
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        binding.recycler.layoutManager = LinearLayoutManager(this)
+        binding.recycler.layoutManager = LinearLayoutManager(requireContext())
         binding.recycler.adapter = adapter
+        binding.uploadCoverButton.setOnClickListener { pickCover.launch("image/*") }
 
-        binding.uploadCoverButton.setOnClickListener {
-            pickCover.launch("image/*")
-        }
-
-        val listId = intent.getStringExtra(EXTRA_LIST_ID).orEmpty()
-        val listTitle = intent.getStringExtra(EXTRA_LIST_TITLE).orEmpty()
-        binding.toolbar.setBrandedTitle(listTitle)
+        val listId = arguments?.getString(TrackRateNavigation.ARG_LIST_ID).orEmpty()
+        val listTitle = arguments?.getString(TrackRateNavigation.ARG_LIST_TITLE).orEmpty()
+        (requireActivity() as? MainActivity)?.setToolbarBrandedTitle(listTitle)
         viewModel.init(listId, listTitle)
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
-                    binding.toolbar.setBrandedTitle(state.listTitle)
+                    (requireActivity() as? MainActivity)?.setToolbarBrandedTitle(state.listTitle)
                     binding.progress.visibility = if (state.isLoading || state.isUploadingCover) {
                         View.VISIBLE
                     } else {
@@ -84,14 +87,8 @@ class ListDetailActivity : ThemedAppCompatActivity() {
         }
     }
 
-    companion object {
-        private const val EXTRA_LIST_ID = "extra_list_id"
-        private const val EXTRA_LIST_TITLE = "extra_list_title"
-
-        fun newIntent(context: Context, listId: String, listTitle: String): Intent =
-            Intent(context, ListDetailActivity::class.java).apply {
-                putExtra(EXTRA_LIST_ID, listId)
-                putExtra(EXTRA_LIST_TITLE, listTitle)
-            }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

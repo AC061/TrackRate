@@ -11,9 +11,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.trackrate.DetailActivity
-import com.example.trackrate.ProfileActivity
 import com.example.trackrate.databinding.FragmentHomeBinding
 import com.example.trackrate.domain.model.CatalogType
+import com.example.trackrate.util.TrackRateNavigation
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -28,7 +28,7 @@ class HomeFragment : Fragment() {
     private val feedAdapter by lazy {
         FeedAdapter(
             onProfileClick = { item ->
-                startActivity(ProfileActivity.newIntent(requireContext(), item.username))
+                TrackRateNavigation.navigateToProfile(this, item.username)
             },
             onEntityClick = { item ->
                 startActivity(DetailActivity.newIntent(requireContext(), item.entityType, item.entityId))

@@ -28,4 +28,72 @@
         android:name="com.example.trackrate.ui.settings.SettingsFragment"
         android:label="@string/menu_settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.trackrate.ui.profile.ProfileFragment"
+        android:label="@string/settings_profile_title">
+        <argument
+            android:name="username"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_edit_profile"
+        android:name="com.example.trackrate.ui.profile.EditProfileFragment"
+        android:label="@string/edit_profile_title" />
+
+    <fragment
+        android:id="@+id/nav_submissions"
+        android:name="com.example.trackrate.ui.moderation.SubmissionsFragment"
+        android:label="@string/submissions_title" />
+
+    <fragment
+        android:id="@+id/nav_lists"
+        android:name="com.example.trackrate.ui.lists.ListsFragment"
+        android:label="@string/lists_title" />
+
+    <fragment
+        android:id="@+id/nav_list_detail"
+        android:name="com.example.trackrate.ui.lists.ListDetailFragment"
+        android:label="@string/lists_title">
+        <argument
+            android:name="listId"
+            app:argType="string" />
+        <argument
+            android:name="listTitle"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_moderation_options"
+        android:name="com.example.trackrate.ui.moderation.ModerationOptionsFragment"
+        android:label="@string/moderation_options_title" />
+
+    <fragment
+        android:id="@+id/nav_moderation"
+        android:name="com.example.trackrate.ui.moderation.ModerationFragment"
+        android:label="@string/moderation_title" />
+
+    <fragment
+        android:id="@+id/nav_moderation_review"
+        android:name="com.example.trackrate.ui.moderation.ModerationReviewFragment"
+        android:label="@string/moderation_review_title">
+        <argument
+            android:name="entityType"
+            app:argType="string" />
+        <argument
+            android:name="entityId"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_admin_users"
+        android:name="com.example.trackrate.ui.admin.AdminUsersFragment"
+        android:label="@string/admin_users_title" />
+
+    <fragment
+        android:id="@+id/nav_labels"
+        android:name="com.example.trackrate.ui.labels.LabelsFragment"
+        android:label="@string/labels_title" />
 </navigation>

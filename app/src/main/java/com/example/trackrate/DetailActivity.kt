@@ -160,7 +160,7 @@ class DetailActivity : ThemedAppCompatActivity() {
                 if (lists.isEmpty()) {
                     Snackbar.make(binding.root, R.string.lists_empty_create_first, Snackbar.LENGTH_LONG)
                         .setAction(R.string.lists_create) {
-                            startActivity(ListsActivity.newIntent(this@DetailActivity))
+                            startActivity(MainActivity.newIntentForLists(this@DetailActivity))
                         }
                         .show()
                     return@launch

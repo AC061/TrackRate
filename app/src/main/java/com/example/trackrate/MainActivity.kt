@@ -1,9 +1,11 @@
 package com.example.trackrate
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import com.google.android.material.navigation.NavigationView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -20,6 +22,7 @@ import com.example.trackrate.data.repository.AuthRepository
 import com.example.trackrate.data.repository.PreferencesRepository
 import com.example.trackrate.data.repository.ProfileRepository
 import com.example.trackrate.databinding.ActivityMainBinding
+import com.example.trackrate.util.TrackRateNavigation
 import com.example.trackrate.util.setBrandedTitle
 import com.example.trackrate.util.setFullLogo
 import dagger.hilt.android.AndroidEntryPoint
@@ -32,6 +35,7 @@ class MainActivity : ThemedAppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
 
     @Inject
     lateinit var authRepository: AuthRepository
@@ -65,7 +69,7 @@ class MainActivity : ThemedAppCompatActivity() {
 
         val navHostFragment =
             (supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment?)!!
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
 
         binding.navView?.let {
             appBarConfiguration = AppBarConfiguration(
@@ -78,22 +82,50 @@ class MainActivity : ThemedAppCompatActivity() {
             it.setupWithNavController(navController)
         }
 
-        binding.appBarMain.contentMain.bottomNavView?.let {
+        binding.appBarMain.contentMain.bottomNavView?.let { bottomNav ->
             appBarConfiguration = AppBarConfiguration(
                 setOf(
                     R.id.nav_transform, R.id.nav_reflow, R.id.nav_slideshow
                 )
             )
             setupActionBarWithNavController(navController, appBarConfiguration)
-            it.setupWithNavController(navController)
+            bottomNav.setupWithNavController(navController)
+            bottomNav.setOnItemReselectedListener { item ->
+                navController.popBackStack(item.itemId, false)
+            }
         }
 
         setupToolbarBranding(navController)
+        handleDeepLink(intent)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleDeepLink(intent)
+    }
+
+    fun setToolbarBrandedTitle(title: CharSequence?) {
+        binding.appBarMain.toolbar.setBrandedTitle(title)
+    }
+
+    private fun handleDeepLink(intent: Intent?) {
+        when (intent?.getStringExtra(EXTRA_DESTINATION)) {
+            DESTINATION_LISTS -> navController.navigate(R.id.nav_lists)
+        }
     }
 
     private fun setupToolbarBranding(navController: NavController) {
         val toolbar = binding.appBarMain.toolbar
+        val topLevelDestinations = setOf(
+            R.id.nav_transform,
+            R.id.nav_reflow,
+            R.id.nav_slideshow,
+            R.id.nav_settings
+        )
         val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+            binding.appBarMain.fab?.visibility =
+                if (destination.id in topLevelDestinations) View.VISIBLE else View.GONE
+
             when (destination.id) {
                 R.id.nav_transform -> toolbar.setFullLogo()
                 else -> toolbar.setBrandedTitle(destination.label)
@@ -122,19 +154,21 @@ class MainActivity : ThemedAppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_moderation -> {
-                startActivity(ModerationOptionsActivity.newIntent(this))
+                navController.navigate(R.id.nav_moderation_options)
                 return true
             }
             R.id.action_profile -> {
                 val username = currentUsername
                 if (username != null) {
-                    startActivity(ProfileActivity.newIntent(this, username))
+                    navController.navigate(
+                        R.id.nav_profile,
+                        Bundle().apply { putString(TrackRateNavigation.ARG_USERNAME, username) }
+                    )
                 }
                 return true
             }
             R.id.nav_settings -> {
-                val navController = findNavController(R.id.nav_host_fragment_content_main)
-                navController.navigate(R.id.nav_settings)
+                findNavController(R.id.nav_host_fragment_content_main).navigate(R.id.nav_settings)
                 return true
             }
         }
@@ -159,7 +193,6 @@ class MainActivity : ThemedAppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
 
@@ -178,5 +211,16 @@ class MainActivity : ThemedAppCompatActivity() {
                 }
             }
         }
+    }
+
+    companion object {
+        private const val EXTRA_DESTINATION = "extra_destination"
+        private const val DESTINATION_LISTS = "lists"
+
+        fun newIntentForLists(context: Context): Intent =
+            Intent(context, MainActivity::class.java).apply {
+                putExtra(EXTRA_DESTINATION, DESTINATION_LISTS)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
     }
 }

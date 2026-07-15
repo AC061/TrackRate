@@ -1,57 +1,60 @@
-package com.example.trackrate
+package com.example.trackrate.ui.moderation
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.EditText
-import androidx.activity.viewModels
-import com.example.trackrate.ui.ThemedAppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.trackrate.ModerationReviewActivity
+import com.example.trackrate.R
 import com.example.trackrate.databinding.ActivityModerationBinding
 import com.example.trackrate.domain.model.CatalogSubmission
-import com.example.trackrate.ui.moderation.ModerationAdapter
-import com.example.trackrate.ui.moderation.ModerationViewModel
-import com.example.trackrate.util.setBrandedTitle
+import com.example.trackrate.util.TrackRateNavigation
+import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ModerationActivity : ThemedAppCompatActivity() {
+class ModerationFragment : Fragment() {
 
-    private lateinit var binding: ActivityModerationBinding
+    private var _binding: ActivityModerationBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: ModerationViewModel by viewModels()
     private val adapter by lazy {
         ModerationAdapter(
             onReview = { item ->
-                startActivity(ModerationReviewActivity.newIntent(this, item.type, item.id))
+                TrackRateNavigation.navigateToModerationReview(this, item.type, item.id)
             },
             onApprove = { item -> viewModel.approve(item.type, item.id) },
             onReject = { item -> showRejectDialog(item) }
         )
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityModerationBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ActivityModerationBinding.inflate(inflater, container, false)
+        binding.root.stripAppBarFromCoordinatorRoot()
+        return binding.root
+    }
 
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.setBrandedTitle(R.string.moderation_title)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        binding.recycler.layoutManager = LinearLayoutManager(this)
+        binding.recycler.layoutManager = LinearLayoutManager(requireContext())
         binding.recycler.adapter = adapter
 
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progress.visibility = if (state.isLoading) View.VISIBLE else View.GONE
                     adapter.submitList(state.items)
@@ -67,11 +70,11 @@ class ModerationActivity : ThemedAppCompatActivity() {
     }
 
     private fun showRejectDialog(item: CatalogSubmission) {
-        val input = EditText(this).apply {
+        val input = EditText(requireContext()).apply {
             hint = getString(R.string.mod_reject_reason_hint)
             setPadding(48, 32, 48, 32)
         }
-        MaterialAlertDialogBuilder(this)
+        MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.mod_reject_title)
             .setView(input)
             .setNegativeButton(android.R.string.cancel, null)
@@ -86,7 +89,8 @@ class ModerationActivity : ThemedAppCompatActivity() {
             .show()
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent = Intent(context, ModerationActivity::class.java)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }
