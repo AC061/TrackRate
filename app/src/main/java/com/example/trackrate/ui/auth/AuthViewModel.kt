@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.trackrate.data.remote.ApiException
 import com.example.trackrate.data.repository.AuthRepository
 import com.example.trackrate.domain.model.SessionStatus
+import com.example.trackrate.util.PasswordPolicy
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -98,12 +99,20 @@ class AuthViewModel @Inject constructor(
         if (email.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) {
             return "Introduce un email válido"
         }
-        if (password.length < 6) {
-            return "La contraseña debe tener al menos 6 caracteres"
+        if (password.isBlank()) {
+            return "Introduce tu contraseña"
         }
-        if (mode == AuthMode.REGISTER && password != confirmPassword) {
-            return "Las contraseñas no coinciden"
+
+        if (mode == AuthMode.REGISTER) {
+            PasswordPolicy.validationError(password)?.let { error ->
+                return error
+            }
+
+            if (password != confirmPassword) {
+                return "Las contraseñas no coinciden"
+            }
         }
+
         return null
     }
 
