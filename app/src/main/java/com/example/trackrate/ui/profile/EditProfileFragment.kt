@@ -18,6 +18,7 @@ import coil.load
 import com.example.trackrate.R
 import com.example.trackrate.databinding.ActivityEditProfileBinding
 import com.example.trackrate.util.CameraCapture
+import com.example.trackrate.util.TrackRateNavigation
 import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -75,6 +76,9 @@ class EditProfileFragment : Fragment() {
 
         binding.changeAvatarButton.setOnClickListener { showAvatarSourceDialog() }
         binding.avatar.setOnClickListener { showAvatarSourceDialog() }
+        binding.changePasswordButton.setOnClickListener {
+            TrackRateNavigation.navigateToChangePassword(this)
+        }
         binding.saveButton.setOnClickListener {
             viewModel.saveProfile(
                 username = binding.usernameInput.text?.toString().orEmpty(),

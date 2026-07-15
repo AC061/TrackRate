@@ -1,36 +1,40 @@
-package com.example.trackrate
+package com.example.trackrate.ui.auth
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import androidx.activity.viewModels
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.fragment.findNavController
 import com.example.trackrate.databinding.ActivityChangePasswordBinding
-import com.example.trackrate.ui.ThemedAppCompatActivity
-import com.example.trackrate.ui.auth.ChangePasswordViewModel
-import com.example.trackrate.util.setBrandedTitle
+import com.example.trackrate.util.stripAppBarFromCoordinatorRoot
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class ChangePasswordActivity : ThemedAppCompatActivity() {
+class ChangePasswordFragment : Fragment() {
 
-    private lateinit var binding: ActivityChangePasswordBinding
+    private var _binding: ActivityChangePasswordBinding? = null
+    private val binding get() = _binding!!
     private val viewModel: ChangePasswordViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        binding = ActivityChangePasswordBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = ActivityChangePasswordBinding.inflate(inflater, container, false)
+        binding.root.stripAppBarFromCoordinatorRoot()
+        return binding.root
+    }
 
-        setSupportActionBar(binding.toolbar)
-        binding.toolbar.setBrandedTitle(R.string.change_password_title)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationOnClickListener { finish() }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
         binding.saveButton.setOnClickListener {
             viewModel.changePassword(
@@ -44,8 +48,8 @@ class ChangePasswordActivity : ThemedAppCompatActivity() {
     }
 
     private fun observeState() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.uiState.collect { state ->
                     binding.progress.visibility = if (state.isSaving) View.VISIBLE else View.GONE
                     binding.saveButton.isEnabled = !state.isSaving
@@ -54,7 +58,7 @@ class ChangePasswordActivity : ThemedAppCompatActivity() {
                         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
                         viewModel.consumeMessage()
                         if (state.success) {
-                            finish()
+                            findNavController().popBackStack()
                         }
                     }
                 }
@@ -62,8 +66,8 @@ class ChangePasswordActivity : ThemedAppCompatActivity() {
         }
     }
 
-    companion object {
-        fun newIntent(context: Context): Intent =
-            Intent(context, ChangePasswordActivity::class.java)
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

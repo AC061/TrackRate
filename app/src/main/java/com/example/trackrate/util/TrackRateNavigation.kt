@@ -19,6 +19,10 @@ object TrackRateNavigation {
         fragment.findNavController().navigate(R.id.nav_edit_profile)
     }
 
+    fun navigateToChangePassword(fragment: Fragment) {
+        fragment.findNavController().navigate(R.id.nav_change_password)
+    }
+
     fun navigateToSubmissions(fragment: Fragment) {
         fragment.findNavController().navigate(R.id.nav_submissions)
     }
