@@ -44,11 +44,6 @@
         android:label="@string/edit_profile_title" />
 
     <fragment
-        android:id="@+id/nav_change_password"
-        android:name="com.example.trackrate.ui.auth.ChangePasswordFragment"
-        android:label="@string/change_password_title" />
-
-    <fragment
         android:id="@+id/nav_submissions"
         android:name="com.example.trackrate.ui.moderation.SubmissionsFragment"
         android:label="@string/submissions_title" />

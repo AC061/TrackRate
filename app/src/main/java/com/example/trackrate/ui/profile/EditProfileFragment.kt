@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import coil.load
+import com.example.trackrate.ChangePasswordActivity
 import com.example.trackrate.R
 import com.example.trackrate.databinding.ActivityEditProfileBinding
 import com.example.trackrate.util.CameraCapture
@@ -77,7 +78,7 @@ class EditProfileFragment : Fragment() {
         binding.changeAvatarButton.setOnClickListener { showAvatarSourceDialog() }
         binding.avatar.setOnClickListener { showAvatarSourceDialog() }
         binding.changePasswordButton.setOnClickListener {
-            TrackRateNavigation.navigateToChangePassword(this)
+            startActivity(ChangePasswordActivity.newIntent(requireContext()))
         }
         binding.saveButton.setOnClickListener {
             viewModel.saveProfile(
