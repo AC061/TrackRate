@@ -41,39 +41,31 @@ class ProfileViewModel @Inject constructor(
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
     private var loadedUsername: String? = null
+    private var isOwnProfileSession: Boolean = false
 
     fun load(username: String) {
         loadedUsername = username
+        if (username.isBlank() && authRepository.currentUserId != null) {
+            isOwnProfileSession = true
+            loadFromCurrentUser()
+            return
+        }
         _uiState.value = ProfileUiState(isLoading = true)
         viewModelScope.launch {
             try {
                 val profile = profileRepository.getProfileByUsername(username)
                 if (profile == null) {
+                    if (isOwnProfileSession) {
+                        loadFromCurrentUser()
+                        return@launch
+                    }
                     _uiState.value = ProfileUiState(
                         isLoading = false,
                         message = "Usuario no encontrado"
                     )
                     return@launch
                 }
-                val currentUserId = authRepository.currentUserId
-                val isOwn = currentUserId == profile.id
-                val stats = profileRepository.getProfileStats(profile.id)
-                val ratingStats = profileRepository.getUserRatingStats(profile.id)
-                val ratings = ratingRepository.getUserDiary(profile.id)
-                val isFollowing = if (!isOwn && currentUserId != null) {
-                    followRepository.isFollowing(profile.id)
-                } else {
-                    false
-                }
-                _uiState.value = ProfileUiState(
-                    isLoading = false,
-                    profile = profile,
-                    stats = stats,
-                    ratingStats = ratingStats,
-                    ratings = ratings,
-                    isFollowing = isFollowing,
-                    isOwnProfile = isOwn
-                )
+                bindProfile(profile)
             } catch (e: Exception) {
                 _uiState.value = ProfileUiState(
                     isLoading = false,
@@ -81,6 +73,52 @@ class ProfileViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun loadFromCurrentUser() {
+        _uiState.value = _uiState.value.copy(isLoading = true, message = null)
+        viewModelScope.launch {
+            try {
+                val profile = profileRepository.getCurrentProfile()
+                if (profile == null) {
+                    _uiState.value = ProfileUiState(
+                        isLoading = false,
+                        message = "Usuario no encontrado"
+                    )
+                    return@launch
+                }
+                bindProfile(profile)
+            } catch (e: Exception) {
+                _uiState.value = ProfileUiState(
+                    isLoading = false,
+                    message = e.message ?: "Error al cargar el perfil"
+                )
+            }
+        }
+    }
+
+    private suspend fun bindProfile(profile: UserProfile) {
+        val currentUserId = authRepository.currentUserId
+        val isOwn = currentUserId == profile.id
+        isOwnProfileSession = isOwn
+        loadedUsername = profile.username
+        val stats = profileRepository.getProfileStats(profile.id)
+        val ratingStats = profileRepository.getUserRatingStats(profile.id)
+        val ratings = ratingRepository.getUserDiary(profile.id)
+        val isFollowing = if (!isOwn && currentUserId != null) {
+            followRepository.isFollowing(profile.id)
+        } else {
+            false
+        }
+        _uiState.value = ProfileUiState(
+            isLoading = false,
+            profile = profile,
+            stats = stats,
+            ratingStats = ratingStats,
+            ratings = ratings,
+            isFollowing = isFollowing,
+            isOwnProfile = isOwn
+        )
     }
 
     fun toggleFollow() {
@@ -114,7 +152,11 @@ class ProfileViewModel @Inject constructor(
     }
 
     fun reload() {
-        loadedUsername?.let { load(it) }
+        if (isOwnProfileSession) {
+            loadFromCurrentUser()
+        } else {
+            loadedUsername?.let { load(it) }
+        }
     }
 
     fun signOut() {

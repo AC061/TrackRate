@@ -78,7 +78,10 @@ class ProfileFragment : Fragment() {
                     binding.content.visibility =
                         if (state.profile != null && !state.isLoading) View.VISIBLE else View.GONE
 
-                    state.profile?.let { bindProfile(it, state.stats, state.ratingStats) }
+                    state.profile?.let { profile ->
+                        bindProfile(profile, state.stats, state.ratingStats)
+                        syncUsernameArgument(profile, state.isOwnProfile)
+                    }
                     ratingsAdapter.submitList(state.ratings)
                     binding.ratingsEmpty.visibility =
                         if (state.ratings.isEmpty() && state.profile != null) View.VISIBLE else View.GONE
@@ -158,6 +161,14 @@ class ProfileFragment : Fragment() {
             )
         } else {
             binding.ratingStatsCard.visibility = View.GONE
+        }
+    }
+
+    private fun syncUsernameArgument(profile: UserProfile, isOwnProfile: Boolean) {
+        if (!isOwnProfile) return
+        val current = arguments?.getString(TrackRateNavigation.ARG_USERNAME)
+        if (current != profile.username) {
+            arguments?.putString(TrackRateNavigation.ARG_USERNAME, profile.username)
         }
     }
 
