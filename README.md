@@ -5,8 +5,6 @@ App Android tipo Letterboxd para música, con backend propio FastAPI.
 **Curso:** 1GS132 — Ingeniería de Desarrollo de Software Móvil  
 **Integrantes:** ver comentario ENT-1 en [`MainActivity.kt`](app/src/main/java/com/example/trackrate/MainActivity.kt)
 
-> **Material de presentación:** documento detallado con tecnologías, arquitectura y estructura del proyecto → [`docs/PRESENTACION.md`](docs/PRESENTACION.md)
-
 ## Arquitectura
 
 ```
@@ -102,7 +100,6 @@ Ver [`docs/LICENSES.md`](docs/LICENSES.md) para el detalle de iconos MDI, depend
 
 ## Documentación
 
-- **Presentación (tecnologías y estructura):** [`docs/PRESENTACION.md`](docs/PRESENTACION.md)
 - Backend API: [`backend/README.md`](backend/README.md)
 - Supabase legacy: [`docs/legacy-supabase/README.md`](docs/legacy-supabase/README.md)
 
