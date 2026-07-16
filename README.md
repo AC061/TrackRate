@@ -9,7 +9,7 @@ App Android tipo Letterboxd para música, con backend propio FastAPI.
 
 ```
 Android (Kotlin, MVVM, Hilt, Navigation Component)
-    ├── 4 Activities: Login, Main, Detail, Submit
+    ├── 5 Activities: Login, Main, Detail, Submit, Change Password
     ├── Fragments: Home, Search, Diary, Profile, Moderación, Listas, …
     └── Ktor Client + JWT
             └── FastAPI (Python)
