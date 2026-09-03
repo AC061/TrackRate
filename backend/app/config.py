@@ -18,6 +18,9 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
 
     musicbrainz_ws_url: str = "http://localhost:5000/ws/2"
+    musicbrainz_database_url: str = (
+        "postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz"
+    )
     musicbrainz_user_agent: str = "TrackRate/1.0 (dev@trackrate.local)"
     musicbrainz_timeout_seconds: float = 15.0
     cover_art_archive_url: str = "https://coverartarchive.org"

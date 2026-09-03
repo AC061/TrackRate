@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from app.models import ListItem, MusicEntityType, Rating
+from app.services.musicbrainz_db import exists as db_exists
 from app.services.musicbrainz_client import (
     MusicBrainzClient,
     MusicBrainzError,
@@ -12,6 +13,8 @@ _mb = MusicBrainzClient()
 
 
 def entity_exists(entity_type: MusicEntityType, entity_id: UUID) -> bool:
+    if db_exists(entity_type.value, entity_id):
+        return True
     return _mb.exists(entity_type.value, entity_id)
 
 

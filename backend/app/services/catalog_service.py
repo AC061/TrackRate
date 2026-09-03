@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.models import MusicEntityType, Rating
 from app.schemas.catalog import CatalogDetailResponse, CatalogItemResponse, TopRatedEntityResponse
 from app.services.cover_art_service import cover_art_url
+from app.services.musicbrainz_db import MusicBrainzDbError, search as db_search
 from app.services.musicbrainz_client import (
     MusicBrainzClient,
     MusicBrainzError,
@@ -26,6 +27,10 @@ class CatalogNotFoundError(Exception):
 
 
 class CatalogValidationError(Exception):
+    pass
+
+
+class CatalogSearchError(Exception):
     pass
 
 
@@ -65,9 +70,12 @@ def search_catalog(
         return []
 
     try:
-        results = _mb.search(clean, entity_type, limit=SEARCH_LIMIT)
-    except MusicBrainzError:
-        return []
+        results = db_search(clean, entity_type, limit=SEARCH_LIMIT)
+    except MusicBrainzDbError as exc:
+        raise CatalogSearchError(
+            "No se pudo consultar MusicBrainz Postgres. "
+            "Comprueba MUSICBRAINZ_DATABASE_URL y GET /catalog/mb-status"
+        ) from exc
 
     items: list[CatalogItemResponse] = []
     for raw in results:

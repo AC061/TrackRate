@@ -17,7 +17,15 @@ else
 fi
 
 echo ""
-echo "=== MusicBrainz WS ($MB_URL) ==="
+echo "=== TrackRate catalog search (SQL, sin Solr) ==="
+if curl -sf "$API_URL/catalog/search?q=beatles&type=artist" | head -c 300; then
+  echo ""
+else
+  echo "FAIL — revisa MUSICBRAINZ_DATABASE_URL y que db tenga datos"
+fi
+
+echo ""
+echo "=== MusicBrainz WS search (puede estar vacío sin Solr; es normal) ==="
 if curl -sf -H "User-Agent: $UA" "${MB_URL}/artist?query=beatles&fmt=json&limit=1" | head -c 200; then
   echo ""
   echo "OK  MusicBrainz responde con datos"

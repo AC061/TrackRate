@@ -48,6 +48,7 @@ services:
       MINIO_ENDPOINT: trackrate-minio:9000
       MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-http://100.126.35.7:9000}
       MUSICBRAINZ_WS_URL: http://musicbrainz:5000/ws/2
+      MUSICBRAINZ_DATABASE_URL: postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz
       MUSICBRAINZ_USER_AGENT: ${MUSICBRAINZ_USER_AGENT:-TrackRate/1.0 (dev@trackrate.local)}
       COVER_ART_ARCHIVE_URL: ${COVER_ART_ARCHIVE_URL:-https://coverartarchive.org}
     depends_on:
@@ -56,6 +57,8 @@ services:
       trackrate-minio:
         condition: service_started
       musicbrainz:
+        condition: service_started
+      db:
         condition: service_started
     command: >
       sh -c "for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do

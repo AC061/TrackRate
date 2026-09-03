@@ -21,15 +21,24 @@ Cover Art Archive:
 - Release-group: `https://coverartarchive.org/release-group/{mbid}/front`
 - Artist: `https://coverartarchive.org/artist/{mbid}/front`
 
+## Fuentes de datos
+
+| Operación | Fuente |
+|-----------|--------|
+| `GET /catalog/search` | Postgres MB (`MUSICBRAINZ_DATABASE_URL`) — **sin Solr** |
+| `GET /catalog/{type}/{mbid}` | MusicBrainz WS (lookup) |
+| Validación entity exists | Postgres MB + fallback WS |
+
 ## Variables de entorno (backend)
 
 ```
-MUSICBRAINZ_WS_URL=http://localhost:5000/ws/2
+MUSICBRAINZ_WS_URL=http://musicbrainz:5000/ws/2
+MUSICBRAINZ_DATABASE_URL=postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz
 MUSICBRAINZ_USER_AGENT=TrackRate/1.0 (contacto@example.com)
 COVER_ART_ARCHIVE_URL=https://coverartarchive.org
 ```
 
-En Docker Compose con MB en el mismo host: `http://musicbrainz:5000/ws/2` (red compartida).
+En Docker Compose: servicios `musicbrainz` y `db` en la misma red. El indexador Solr está desactivado (`compose/musicbrainz-minimal.yml`).
 
 ## Dev (~15 GB)
 

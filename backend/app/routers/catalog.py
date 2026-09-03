@@ -1,11 +1,16 @@
 from uuid import UUID
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
 from app.schemas.catalog import CatalogDetailResponse, CatalogItemResponse, CoverResponse
 from app.services import catalog_service
+from app.services import musicbrainz_db
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
@@ -16,7 +21,15 @@ def search_catalog(
     type: str | None = Query(default=None, pattern=r"^(artist|album|track)$"),
     db: Session = Depends(get_db),
 ) -> list[CatalogItemResponse]:
-    return catalog_service.search_catalog(db, q, type)
+    try:
+        return catalog_service.search_catalog(db, q, type)
+    except catalog_service.CatalogSearchError as exc:
+        raise HTTPException(503, str(exc)) from exc
+
+
+@router.get("/mb-status")
+def musicbrainz_db_status() -> dict:
+    return musicbrainz_db.ping()
 
 
 @router.get("/artists/{artist_id}/albums", response_model=list[CatalogItemResponse])

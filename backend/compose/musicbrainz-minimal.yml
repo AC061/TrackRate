@@ -1,0 +1,10 @@
+# Sin indexador Solr — búsqueda vía SQL en TrackRate API.
+# Solr sigue activo (MusicBrainz lo requiere) con heap reducido.
+
+services:
+  indexer:
+    profiles: ["manual-index"]
+
+  search:
+    environment:
+      SOLR_HEAP: 256m

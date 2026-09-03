@@ -65,6 +65,29 @@ chmod +x scripts/*.sh scripts/musicbrainz/*.sh
 
 Tras `git pull`, `.gitattributes` fuerza LF en `*.sh`.
 
+### Búsqueda vacía en TrackRate
+
+La búsqueda de catálogo usa **Postgres MusicBrainz** (sin Solr). Comprueba:
+
+```bash
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM artist;"
+curl "http://100.126.35.7:8000/catalog/search?q=beatles&type=artist"
+```
+
+El WS directo (`:5000/ws/2/artist?query=`) puede devolver `[]` sin indexador Solr — es normal. Usa la API TrackRate.
+
+### Búsqueda WS MusicBrainz vacía (`artists: []`)
+
+Normal sin Solr. TrackRate no depende del indexador. Detalle/lookup por MBID en `:5000/ws/2/artist/{mbid}` sí funciona vía Postgres.
+
+Comprobar datos en MB:
+
+```bash
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM artist;"
+```
+
+Si el count es 0 → el dump no terminó; `./scripts/stack-reset.sh`.
+
 ### Error `address already in use` en puerto 5432
 
 Otro Postgres (del host o contenedor previo) usa el 5432. TrackRate ya **no publica** Postgres al host; solo la API se conecta por red interna. Tras actualizar:

@@ -2,7 +2,7 @@
 # Uso: cd backend && docker compose up -d
 #
 # Requisito: ./scripts/stack-setup.sh (clona musicbrainz-docker/)
-# TrackRate API → http://musicbrainz:5000/ws/2 (red interna)
+# TrackRate API → WS lookup/detalle; búsqueda catálogo → Postgres MB (sin Solr)
 
 name: trackrate-stack
 
@@ -10,4 +10,5 @@ include:
   - path: musicbrainz-docker/docker-compose.yml
     project_directory: musicbrainz-docker
   - path: compose/musicbrainz-standalone.yml
+  - path: compose/musicbrainz-minimal.yml
   - path: compose/trackrate.yml
