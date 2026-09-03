@@ -38,6 +38,16 @@ else
   docker compose run --rm musicbrainz createdb.sh -fetch
 fi
 
+# shellcheck source=musicbrainz/mb-env.sh
+source "$ROOT/scripts/musicbrainz/mb-env.sh"
+count=$(docker compose exec -T db psql -U musicbrainz -d "$MB_DB" -tAc \
+  "SELECT count(*) FROM ${MB_SCHEMA}.artist" 2>/dev/null || echo "0")
+if ! [[ "$count" =~ ^[1-9][0-9]*$ ]]; then
+  echo "ERROR: ${MB_DB}.${MB_SCHEMA}.artist vacío tras createdb (count=${count})"
+  exit 1
+fi
+echo "==> MusicBrainz OK (${count} artistas en ${MB_DB})"
+
 if [[ ! -f .env ]] && [[ -f .env.example ]]; then
   cp .env.example .env
   echo "==> Creado .env desde .env.example"

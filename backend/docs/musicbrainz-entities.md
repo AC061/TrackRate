@@ -33,7 +33,7 @@ Cover Art Archive:
 
 ```
 MUSICBRAINZ_WS_URL=http://musicbrainz:5000/ws/2
-MUSICBRAINZ_DATABASE_URL=postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz
+MUSICBRAINZ_DATABASE_URL=postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz_db
 MUSICBRAINZ_USER_AGENT=TrackRate/1.0 (contacto@example.com)
 COVER_ART_ARCHIVE_URL=https://coverartarchive.org
 ```

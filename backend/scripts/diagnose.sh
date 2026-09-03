@@ -56,11 +56,9 @@ echo "=== MusicBrainz Postgres (catálogo) ==="
 if docker ps --format '{{.Names}}' 2>/dev/null | grep -qi musicbrainz; then
   MBDB=$(docker ps --format '{{.Names}}' | grep -E '^trackrate-stack-db-|^db-' | head -1 || true)
   if [[ -n "${MBDB:-}" ]]; then
-    docker exec "$MBDB" psql -U musicbrainz -d musicbrainz -c \
+    docker exec "$MBDB" psql -U musicbrainz -d musicbrainz_db -c \
       "SELECT count(*) AS artists FROM musicbrainz.artist;" 2>/dev/null || \
-      docker exec "$MBDB" psql -U musicbrainz -d musicbrainz -c \
-      "SELECT count(*) AS artists FROM artist;" 2>/dev/null || \
-      echo "Consulta artist falló — ¿terminó createdb.sh?"
+      echo "Consulta artist falló — ¿terminó createdb.sh? (base: musicbrainz_db)"
   fi
 else
   echo "musicbrainz-docker no detectado. Clona e instala sample dump."

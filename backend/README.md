@@ -67,11 +67,11 @@ Tras `git pull`, `.gitattributes` fuerza LF en `*.sh`.
 
 ### Base MusicBrainz vacía (no existe `artist`)
 
-El dump **no se cargó**. Comprueba:
+El dump **no se cargó** (o estás consultando la base incorrecta). MusicBrainz Docker usa la base **`musicbrainz_db`**, schema **`musicbrainz`**. Comprueba:
 
 ```bash
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dt"
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dn"
+docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "\dn"
+docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "SELECT count(*) FROM musicbrainz.artist;"
 ```
 
 Si no hay tablas, carga el sample dump (tarda mucho, no interrumpir):
@@ -110,7 +110,7 @@ docker compose up -d
 La búsqueda de catálogo usa **Postgres MusicBrainz** (sin Solr). Comprueba:
 
 ```bash
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM artist;"
+docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "SELECT count(*) FROM musicbrainz.artist;"
 curl "http://100.126.35.7:8000/catalog/search?q=beatles&type=artist"
 ```
 
@@ -123,8 +123,8 @@ Normal sin Solr. TrackRate no depende del indexador. Detalle/lookup por MBID en 
 Comprobar datos en MB:
 
 ```bash
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dt musicbrainz.artist"
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM musicbrainz.artist;"
+docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "\dt musicbrainz.artist"
+docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "SELECT count(*) FROM musicbrainz.artist;"
 ```
 
 Si el count es 0 → el dump no terminó; `./scripts/stack-reset.sh`.

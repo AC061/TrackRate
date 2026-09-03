@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     musicbrainz_ws_url: str = "http://localhost:5000/ws/2"
     musicbrainz_database_url: str = (
-        "postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz"
+        "postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz_db"
     )
     musicbrainz_user_agent: str = "TrackRate/1.0 (dev@trackrate.local)"
     musicbrainz_timeout_seconds: float = 15.0
