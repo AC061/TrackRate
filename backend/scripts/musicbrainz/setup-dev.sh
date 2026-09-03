@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Redirige al stack unificado en la raíz del repo.
+# Alias → stack-setup.sh (sample dump).
 set -euo pipefail
-ROOT="$(cd "$(dirname "$0")/../../.." && pwd)"
-exec bash "$ROOT/scripts/stack-setup.sh" "$@"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+exec bash "$ROOT/scripts/stack-setup.sh" sample

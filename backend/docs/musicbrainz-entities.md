@@ -33,10 +33,16 @@ En Docker Compose con MB en el mismo host: `http://musicbrainz:5000/ws/2` (red c
 
 ## Dev (~15 GB)
 
+Desde `backend/`:
+
 ```bash
-./scripts/musicbrainz/setup-dev.sh
+./scripts/stack-setup.sh
 ```
 
 ## Prod
 
-Ver `scripts/musicbrainz/setup-prod.sh` y [musicbrainz-docker README](https://github.com/metabrainz/musicbrainz-docker).
+```bash
+./scripts/musicbrainz/setup-prod.sh
+```
+
+Ver también [musicbrainz-docker README](https://github.com/metabrainz/musicbrainz-docker).

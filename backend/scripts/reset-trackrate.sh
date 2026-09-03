@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Reset solo volúmenes TrackRate (sin tocar MusicBrainz).
 set -euo pipefail
-ROOT="$(ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
-cd "$ROOT" && pwd)"
+
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
 docker compose stop trackrate-api trackrate-postgres trackrate-minio 2>/dev/null || true

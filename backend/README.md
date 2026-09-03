@@ -1,38 +1,85 @@
 # TrackRate API (FastAPI)
 
-Catálogo vía **MusicBrainz** + capa social. El Docker Compose unificado está en la **raíz del repo**.
+Backend desplegable en servidor — catálogo **MusicBrainz** + capa social.
 
-Ver [`../README-DOCKER.md`](../README-DOCKER.md) para levantar MusicBrainz + TrackRate juntos.
+Solo esta carpeta `backend/` debe vivir en el servidor de desarrollo.
 
-## Desde la raíz (recomendado)
+## Stack Docker (TrackRate + MusicBrainz)
 
-```bash
-cd ..
-./scripts/stack-setup.sh      # primera vez (~15 GB)
-docker compose up -d
-docker compose logs -f trackrate-api
+```
+MusicBrainz              TrackRate
+├── db                   ├── trackrate-postgres
+├── valkey               ├── trackrate-minio
+├── search               └── trackrate-api → musicbrainz:5000
+└── musicbrainz :5000
 ```
 
-## Reset TrackRate sin borrar MusicBrainz
+### Primera instalación
+
+```bash
+cd backend
+cp .env.example .env
+chmod +x scripts/stack-setup.sh scripts/stack-reset.sh
+./scripts/stack-setup.sh
+```
+
+Sample dump ~15 GB. Tarda bastante.
+
+### Error `Only full data can be loaded in mirror mode`
+
+MusicBrainz estaba en mirror mode. El compose incluye `compose/musicbrainz-standalone.yml` para permitir `-sample`. Tras actualizar:
+
+```bash
+docker compose down -v
+./scripts/stack-setup.sh
+```
+
+### Reset completo (setup fallido)
+
+```bash
+./scripts/stack-reset.sh
+```
+
+### Uso diario
+
+```bash
+docker compose up -d
+docker compose ps
+docker compose logs -f trackrate-api musicbrainz
+```
+
+### Reset solo TrackRate (sin borrar MusicBrainz)
 
 ```bash
 ./scripts/reset-trackrate.sh
 ```
 
-## Reset completo (MB + TrackRate)
+### Error `env: bash\r: No such file or directory`
+
+Los scripts se editaron en Windows y tienen finales CRLF. En el servidor Ubuntu:
 
 ```bash
-../scripts/stack-reset.sh
+sed -i 's/\r$//' scripts/*.sh scripts/musicbrainz/*.sh
+chmod +x scripts/*.sh scripts/musicbrainz/*.sh
 ```
 
-## Desarrollo local de la API (sin Docker para Python)
+Tras `git pull`, `.gitattributes` fuerza LF en `*.sh`.
+
+### Diagnóstico
 
 ```bash
-docker compose up trackrate-postgres trackrate-minio musicbrainz -d   # desde raíz
-cd backend && pip install -r requirements.txt && cp .env.example .env
-alembic upgrade head && python -m scripts.seed
-uvicorn app.main:app --reload --port 8000
+./scripts/diagnose.sh 100.126.35.7
+python scripts/smoke_test.py   # TRACKRATE_API_URL=http://100.126.35.7:8000
 ```
+
+## URLs (servidor dev Tailscale)
+
+| Servicio | URL |
+|----------|-----|
+| TrackRate API | http://100.126.35.7:8000 |
+| MusicBrainz WS | http://100.126.35.7:5000/ws/2 |
+| MinIO | http://100.126.35.7:9000 |
+| OpenAPI | http://100.126.35.7:8000/docs |
 
 ## Credenciales dev
 
@@ -40,6 +87,26 @@ uvicorn app.main:app --reload --port 8000
 |-------|----------|
 | admin@trackrate.dev | TrackRateAdmin123! |
 
-## Endpoints
+## Scripts
 
-Ver [`docs/musicbrainz-entities.md`](docs/musicbrainz-entities.md) y `/docs` en :8000.
+| Script | Descripción |
+|--------|-------------|
+| `scripts/stack-setup.sh` | Clona MB, sample dump, levanta todo |
+| `scripts/stack-reset.sh` | Borra volúmenes y reinstala |
+| `scripts/reset-trackrate.sh` | Reset solo Postgres/MinIO/API |
+| `scripts/diagnose.sh` | Comprueba API, MB y bases |
+| `scripts/smoke_test.py` | Smoke test HTTP |
+| `scripts/musicbrainz/setup-prod.sh` | Mirror producción (~100+ GB) |
+
+## Desarrollo local (API sin contenedor)
+
+```bash
+docker compose up -d trackrate-postgres trackrate-minio musicbrainz
+pip install -r requirements.txt
+alembic upgrade head && python -m scripts.seed
+uvicorn app.main:app --reload --port 8000
+```
+
+## Documentación
+
+- [`docs/musicbrainz-entities.md`](docs/musicbrainz-entities.md) — mapeo entity_type → MBID

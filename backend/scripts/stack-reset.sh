@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Reset total: borra volúmenes TrackRate + MusicBrainz y vuelve a setup sample.
+# Reset total: borra volúmenes TrackRate + MusicBrainz y reinstala sample dump.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

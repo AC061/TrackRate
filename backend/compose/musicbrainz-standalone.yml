@@ -1,0 +1,7 @@
+# Fuerza modo standalone (requerido para createdb.sh -sample).
+# Sin esto, musicbrainz-docker arranca en mirror mode y rechaza el sample dump.
+
+services:
+  musicbrainz:
+    environment:
+      MUSICBRAINZ_STANDALONE_SERVER: "1"

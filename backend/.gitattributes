@@ -1,0 +1,7 @@
+# Scripts shell deben usar LF (Linux/macOS)
+*.sh text eol=lf
+
+# Docker / env
+Dockerfile text eol=lf
+*.yml text eol=lf
+.env.example text eol=lf

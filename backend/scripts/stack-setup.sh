@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Setup completo del stack TrackRate + MusicBrainz (sample dump ~15 GB).
+# Setup completo: TrackRate + MusicBrainz (sample dump ~15 GB).
+# Ejecutar desde backend/: ./scripts/stack-setup.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -14,12 +15,21 @@ if [[ ! -d "$MB_DIR/.git" ]]; then
 fi
 
 cd "$MB_DIR"
-echo "==> Configurando musicbrainz-standalone (dev/test)..."
-admin/configure add musicbrainz-standalone
+echo "==> Configurando musicbrainz-standalone en clone MB (opcional)..."
+admin/configure add musicbrainz-standalone 2>/dev/null || true
 
 cd "$ROOT"
 echo "==> Construyendo imágenes (MusicBrainz + TrackRate)..."
 docker compose build
+
+if [[ "$SAMPLE" == "sample" ]]; then
+  echo "==> Verificando modo standalone (requerido para -sample)..."
+  if ! docker compose run --rm --no-deps musicbrainz printenv MUSICBRAINZ_STANDALONE_SERVER 2>/dev/null | grep -q 1; then
+    echo "ERROR: MUSICBRAINZ_STANDALONE_SERVER no está activo."
+    echo "       Asegúrate de tener compose/musicbrainz-standalone.yml incluido en docker-compose.yml"
+    exit 1
+  fi
+fi
 
 echo "==> Creando base MusicBrainz (puede tardar mucho)..."
 if [[ "$SAMPLE" == "sample" ]]; then
@@ -28,9 +38,9 @@ else
   docker compose run --rm musicbrainz createdb.sh -fetch
 fi
 
-if [[ ! -f backend/.env ]] && [[ -f backend/.env.example ]]; then
-  cp backend/.env.example backend/.env
-  echo "==> Creado backend/.env desde .env.example"
+if [[ ! -f .env ]] && [[ -f .env.example ]]; then
+  cp .env.example .env
+  echo "==> Creado .env desde .env.example"
 fi
 
 echo "==> Levantando stack completo..."

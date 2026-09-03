@@ -1,15 +1,20 @@
 #!/usr/bin/env bash
-# MusicBrainz Docker — mirror producción (~100–350 GB). Requiere token MetaBrainz para replicación.
+# MusicBrainz mirror producción (~100–350 GB).
 set -euo pipefail
 
-INSTALL_DIR="${1:-/opt/musicbrainz-docker}"
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+MB_DIR="${MUSICBRAINZ_DOCKER_DIR:-$ROOT/musicbrainz-docker}"
 
-if [[ ! -d "$INSTALL_DIR/.git" ]]; then
-  git clone https://github.com/metabrainz/musicbrainz-docker.git "$INSTALL_DIR"
+cd "$ROOT"
+
+if [[ ! -d "$MB_DIR/.git" ]]; then
+  git clone https://github.com/metabrainz/musicbrainz-docker.git "$MB_DIR"
 fi
 
-cd "$INSTALL_DIR"
+echo "==> Construyendo imágenes..."
 docker compose build
+
+echo "==> Creando base MusicBrainz (dump completo, horas)..."
 docker compose run --rm musicbrainz createdb.sh -fetch
 
 docker compose run --rm musicbrainz bash -c \
@@ -17,5 +22,6 @@ docker compose run --rm musicbrainz bash -c \
 
 docker compose up -d
 
-echo "Opcional: índices Solr — docker compose exec indexer python -m sir reindex"
-echo "Replicación: admin/set-replication-token && admin/configure add replication-token replication-cron"
+echo "Opcional: docker compose exec indexer python -m sir reindex"
+echo "Replicación: cd musicbrainz-docker && admin/set-replication-token"
+echo "               admin/configure add replication-token replication-cron"

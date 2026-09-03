@@ -23,7 +23,7 @@ if curl -sf -H "User-Agent: $UA" "${MB_URL}/artist?query=beatles&fmt=json&limit=
   echo "OK  MusicBrainz responde con datos"
 else
   echo "FAIL — MusicBrainz vacío o no instalado."
-  echo "      Ejecuta: ./scripts/musicbrainz/setup-dev.sh"
+  echo "      Ejecuta: ./scripts/stack-setup.sh"
   echo "      (tarda ~15 GB descarga + createdb.sh -sample -fetch)"
 fi
 

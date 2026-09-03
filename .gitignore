@@ -54,8 +54,8 @@ backend/.pytest_cache/
 backend/.mypy_cache/
 backend/.ruff_cache/
 
-# MusicBrainz Docker (clone local, no versionar)
-musicbrainz-docker/
+# MusicBrainz Docker (clone local en servidor, no versionar)
+backend/musicbrainz-docker/
 
 # Node (icon generation tool)
 node_modules/
