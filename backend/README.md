@@ -65,6 +65,21 @@ chmod +x scripts/*.sh scripts/musicbrainz/*.sh
 
 Tras `git pull`, `.gitattributes` fuerza LF en `*.sh`.
 
+### Error `address already in use` en puerto 5432
+
+Otro Postgres (del host o contenedor previo) usa el 5432. TrackRate ya **no publica** Postgres al host; solo la API se conecta por red interna. Tras actualizar:
+
+```bash
+docker compose up -d
+```
+
+Si necesitas acceder desde el host (psql, DBeaver), añade en `compose/trackrate.yml` bajo `trackrate-postgres`:
+
+```yaml
+ports:
+  - "5433:5432"
+```
+
 ### Diagnóstico
 
 ```bash

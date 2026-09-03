@@ -8,8 +8,8 @@ services:
       POSTGRES_USER: trackrate
       POSTGRES_PASSWORD: trackrate
       POSTGRES_DB: trackrate
-    ports:
-      - "${TRACKRATE_POSTGRES_PORT:-5432}:5432"
+    expose:
+      - "5432"
     volumes:
       - trackrate_postgres_data:/var/lib/postgresql/data
     healthcheck:
