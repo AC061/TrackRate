@@ -65,6 +65,46 @@ chmod +x scripts/*.sh scripts/musicbrainz/*.sh
 
 Tras `git pull`, `.gitattributes` fuerza LF en `*.sh`.
 
+### Base MusicBrainz vacía (no existe `artist`)
+
+El dump **no se cargó**. Comprueba:
+
+```bash
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dt"
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dn"
+```
+
+Si no hay tablas, carga el sample dump (tarda mucho, no interrumpir):
+
+```bash
+chmod +x scripts/musicbrainz/load-sample-db.sh
+./scripts/musicbrainz/load-sample-db.sh
+```
+
+O manualmente:
+
+```bash
+docker compose run --rm musicbrainz createdb.sh -sample -fetch
+```
+
+Si falló a medias (`schema already exists`, wget `416`, `collation already exists`), **borra volúmenes MB** y repite:
+
+```bash
+chmod +x scripts/musicbrainz/reset-db-volumes.sh
+# Usa tmux/screen — tarda 30–90 min
+tmux new -s mb ./scripts/musicbrainz/reset-db-volumes.sh
+```
+
+Manual:
+
+```bash
+docker compose down
+docker volume ls | grep -E 'pgdata|dbdump'
+docker volume rm trackrate-stack_pgdata trackrate-stack_dbdump   # nombres según tu salida
+docker compose run --rm musicbrainz createdb.sh -sample -fetch
+docker compose up -d
+```
+
 ### Búsqueda vacía en TrackRate
 
 La búsqueda de catálogo usa **Postgres MusicBrainz** (sin Solr). Comprueba:
