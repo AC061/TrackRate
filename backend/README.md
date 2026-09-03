@@ -83,7 +83,8 @@ Normal sin Solr. TrackRate no depende del indexador. Detalle/lookup por MBID en 
 Comprobar datos en MB:
 
 ```bash
-docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM artist;"
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "\dt musicbrainz.artist"
+docker compose exec db psql -U musicbrainz -d musicbrainz -c "SELECT count(*) FROM musicbrainz.artist;"
 ```
 
 Si el count es 0 → el dump no terminó; `./scripts/stack-reset.sh`.
