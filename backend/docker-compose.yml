@@ -1,0 +1,4 @@
+# Wrapper — preferir desde la raíz del repo:
+#   cd .. && docker compose up -d
+include:
+  - path: ../docker-compose.yml
