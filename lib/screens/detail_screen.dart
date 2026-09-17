@@ -1,26 +1,26 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/models/catalog.dart';
 import '../api/trackrate_client.dart';
+import '../providers/trackrate_providers.dart';
 
-class DetailScreen extends StatefulWidget {
+class DetailScreen extends ConsumerStatefulWidget {
   const DetailScreen({
     super.key,
-    required this.client,
     required this.entityType,
     required this.entityId,
   });
 
-  final TrackRateClient client;
   final String entityType;
   final String entityId;
 
   @override
-  State<DetailScreen> createState() => _DetailScreenState();
+  ConsumerState<DetailScreen> createState() => _DetailScreenState();
 }
 
-class _DetailScreenState extends State<DetailScreen> {
+class _DetailScreenState extends ConsumerState<DetailScreen> {
   CatalogDetail? _detail;
   RatingStats? _stats;
   bool _loading = true;
@@ -33,21 +33,28 @@ class _DetailScreenState extends State<DetailScreen> {
   }
 
   Future<void> _load() async {
+    final client = ref.read(trackRateClientProvider);
     try {
-      final detail = await widget.client.getCatalogDetail(
+      final detail = await client.getCatalogDetail(
         entityType: widget.entityType,
         entityId: widget.entityId,
       );
-      final stats = await widget.client.getRatingStats(
+      final stats = await client.getRatingStats(
         entityType: widget.entityType,
         entityId: widget.entityId,
       );
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _detail = detail;
         _stats = stats;
         _loading = false;
       });
     } on TrackRateException catch (e) {
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _error = e.message;
         _loading = false;

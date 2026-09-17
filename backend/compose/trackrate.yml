@@ -38,6 +38,11 @@ services:
       context: ..
       dockerfile: Dockerfile
     container_name: trackrate-api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      # Monta el código del host: cambios vía FTP se ven sin rebuild de imagen
+      - ..:/app
     ports:
       - "${TRACKRATE_API_PORT:-8000}:8000"
     env_file:
@@ -51,10 +56,22 @@ services:
       MUSICBRAINZ_DATABASE_URL: postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz_db
       MUSICBRAINZ_USER_AGENT: ${MUSICBRAINZ_USER_AGENT:-TrackRate/1.0 (dev@trackrate.local)}
       COVER_ART_ARCHIVE_URL: ${COVER_ART_ARCHIVE_URL:-https://coverartarchive.org}
+      SONIC_ENABLED: ${SONIC_ENABLED:-true}
+      SONIC_HOST: ${SONIC_HOST:-host.docker.internal}
+      SONIC_PORT: "1491"
+      SONIC_PASSWORD: ${SONIC_PASSWORD:-TrackRateSonicDev}
+      SONIC_COLLECTION: catalog
+      SONIC_FALLBACK_SQL: ${SONIC_FALLBACK_SQL:-true}
+      SONIC_TIMEOUT_SECONDS: ${SONIC_TIMEOUT_SECONDS:-60}
+      SONIC_QUERY_TIMEOUT_SECONDS: ${SONIC_QUERY_TIMEOUT_SECONDS:-8}
+      SONIC_QUERY_READ_TIMEOUT_SECONDS: ${SONIC_QUERY_READ_TIMEOUT_SECONDS:-120}
+      SONIC_PROBE_TIMEOUT_SECONDS: ${SONIC_PROBE_TIMEOUT_SECONDS:-5}
     depends_on:
       trackrate-postgres:
         condition: service_healthy
       trackrate-minio:
+        condition: service_started
+      sonic:
         condition: service_started
       musicbrainz:
         condition: service_started
@@ -69,6 +86,40 @@ services:
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     restart: unless-stopped
 
+  sonic:
+    image: valeriansaliou/sonic:v1.4.9
+    container_name: sonic
+    hostname: sonic
+    networks:
+      default:
+        aliases:
+          - sonic
+          - trackrate-sonic
+    volumes:
+      - ../config/sonic.cfg:/etc/sonic.cfg:ro
+      - sonic_store:/var/lib/sonic/store
+    ports:
+      - "${SONIC_PORT:-1491}:1491"
+    expose:
+      - "1491"
+    environment:
+      SONIC_CHANNEL__INET: "0.0.0.0:1491"
+      SONIC_CHANNEL__AUTH_PASSWORD: ${SONIC_PASSWORD:-TrackRateSonicDev}
+      SONIC_STORE__KV__PATH: /var/lib/sonic/store/kv/
+      SONIC_STORE__FST__PATH: /var/lib/sonic/store/fst/
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "if command -v nc >/dev/null 2>&1; then nc -z 127.0.0.1 1491; else python3 -c \"import socket;s=socket.create_connection(('127.0.0.1',1491),2);s.close()\"; fi",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 15s
+    restart: unless-stopped
+
 volumes:
   trackrate_postgres_data:
   trackrate_minio_data:
+  sonic_store:

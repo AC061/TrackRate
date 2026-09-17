@@ -36,9 +36,18 @@ MUSICBRAINZ_WS_URL=http://musicbrainz:5000/ws/2
 MUSICBRAINZ_DATABASE_URL=postgresql+psycopg://musicbrainz:musicbrainz@db:5432/musicbrainz_db
 MUSICBRAINZ_USER_AGENT=TrackRate/1.0 (contacto@example.com)
 COVER_ART_ARCHIVE_URL=https://coverartarchive.org
+SONIC_ENABLED=true
+SONIC_HOST=sonic
+SONIC_PORT=1491
 ```
 
-En Docker Compose: servicios `musicbrainz` y `db` en la misma red. El indexador Solr está desactivado (`compose/musicbrainz-minimal.yml`).
+En Docker Compose: servicios `musicbrainz`, `db` y `sonic` en la misma red. La búsqueda de catálogo usa Sonic (typos + suggest) con datos enriquecidos desde Postgres MB. El indexador Solr está desactivado (`compose/musicbrainz-minimal.yml`).
+
+Indexar tras cargar sample dump:
+
+```bash
+docker compose exec trackrate-api python -m scripts.index_sonic_catalog --flush
+```
 
 ## Dev (~15 GB)
 

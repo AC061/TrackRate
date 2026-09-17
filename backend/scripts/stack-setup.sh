@@ -31,11 +31,40 @@ if [[ "$SAMPLE" == "sample" ]]; then
   fi
 fi
 
-echo "==> Creando base MusicBrainz (puede tardar mucho)..."
+echo "==> Iniciando Postgres MB + Solr + Valkey..."
+docker compose up -d db search valkey
+
+echo "==> Esperando Postgres MB..."
+for i in $(seq 1 60); do
+  if docker compose exec -T db pg_isready -U musicbrainz >/dev/null 2>&1; then
+    echo "    Postgres MB listo (${i}s)"
+    break
+  fi
+  if [[ "$i" -eq 60 ]]; then
+    echo "ERROR: Postgres MB no respondió en 2 min"
+    bash "$ROOT/scripts/diagnose-stack.sh" || true
+    exit 1
+  fi
+  sleep 2
+done
+
+echo "==> Creando base MusicBrainz (puede tardar mucho — no interrumpir)..."
 if [[ "$SAMPLE" == "sample" ]]; then
+  set +e
   docker compose run --rm musicbrainz createdb.sh -sample -fetch
+  CREATEDB_EXIT=$?
+  set -e
 else
+  set +e
   docker compose run --rm musicbrainz createdb.sh -fetch
+  CREATEDB_EXIT=$?
+  set -e
+fi
+
+if [[ "$CREATEDB_EXIT" -ne 0 ]]; then
+  echo "ERROR: createdb.sh falló (código $CREATEDB_EXIT)"
+  bash "$ROOT/scripts/diagnose-stack.sh" || true
+  exit 1
 fi
 
 # shellcheck source=musicbrainz/mb-env.sh
@@ -56,10 +85,29 @@ fi
 echo "==> Levantando stack completo..."
 docker compose up -d
 
+echo "==> Esperando servicios (30 s)..."
+sleep 30
+
+if docker compose ps sonic 2>/dev/null | grep -qE 'Up|running'; then
+  echo "==> Indexando catálogo en Sonic (puede tardar varios minutos)..."
+  if [[ -x "$ROOT/scripts/index-sonic.sh" ]]; then
+    bash "$ROOT/scripts/index-sonic.sh" --flush || {
+      echo "WARN: indexación Sonic falló — reintenta: ./scripts/index-sonic.sh --flush"
+    }
+  else
+    docker compose exec -T trackrate-api python -m scripts.index_sonic_catalog --flush || {
+      echo "WARN: indexación Sonic falló — reintenta manualmente"
+    }
+  fi
+else
+  echo "WARN: servicio sonic no detectado — omite indexación"
+fi
+
 echo ""
 echo "Listo."
 echo "  MusicBrainz WS: http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo localhost):5000/ws/2"
 echo "  TrackRate API:  http://$(hostname -I 2>/dev/null | awk '{print $1}' || echo localhost):8000"
 echo "  Docs:           http://localhost:8000/docs"
 echo ""
-echo "Logs: docker compose logs -f trackrate-api musicbrainz"
+echo "Verificar Sonic: docker compose exec trackrate-api python -m scripts.diagnose_sonic"
+echo "Logs: docker compose logs -f trackrate-api musicbrainz sonic"

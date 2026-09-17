@@ -18,10 +18,12 @@ MusicBrainz              TrackRate
 
 ```bash
 cd backend
-cp .env.example .env
+cp .env.example .env   # obligatorio: compose no lee .env.example
 chmod +x scripts/stack-setup.sh scripts/stack-reset.sh
 ./scripts/stack-setup.sh
 ```
+
+**Despliegue por FTP:** sube `backend/` al servidor y ejecuta `cp .env.example .env` antes de `docker compose up`. Sin `.env`, variables como `SONIC_HOST` no existen (aunque estén en `.env.example`).
 
 Sample dump ~15 GB. Tarda bastante.
 
@@ -34,10 +36,39 @@ docker compose down -v
 ./scripts/stack-setup.sh
 ```
 
-### Reset completo (setup fallido)
+### Reset completo (setup fallido / redes rotas)
+
+Borra contenedores, red Docker atascada, volúmenes MB + TrackRate + Sonic y reinstala todo.
+**Tarda 30–90 min** (sample dump + indexación Sonic). Usa `tmux` o `screen`:
 
 ```bash
-./scripts/stack-reset.sh
+cd backend
+git pull
+sed -i 's/\r$//' scripts/*.sh scripts/musicbrainz/*.sh   # si editaste en Windows
+chmod +x scripts/*.sh
+tmux new -s reset './scripts/stack-reset.sh'
+```
+
+Si el dump MB ya está bien y solo quieres limpiar Docker sin recargar datos:
+
+```bash
+./scripts/stack-reset.sh --skip-mb
+./scripts/index-sonic.sh --flush
+```
+
+Reset manual de emergencia (sin script):
+
+```bash
+cd backend
+sudo docker compose down -v --remove-orphans
+sudo docker rm -f trackrate-stack-indexer-1 2>/dev/null || true
+# Si la red no se borra:
+for c in $(sudo docker network inspect trackrate-stack_default -f '{{range .Containers}}{{.Name}} {{end}}' 2>/dev/null); do
+  sudo docker rm -f "$c"
+done
+sudo docker network rm trackrate-stack_default 2>/dev/null || true
+sudo docker volume ls | grep trackrate-stack
+./scripts/stack-setup.sh
 ```
 
 ### Uso diario
@@ -105,9 +136,57 @@ docker compose run --rm musicbrainz createdb.sh -sample -fetch
 docker compose up -d
 ```
 
+### Búsqueda de catálogo (Sonic)
+
+La búsqueda usa **Sonic** (typos + autocomplete) con enriquecimiento desde Postgres MusicBrainz. Si Sonic no está indexado o no responde, hay fallback SQL (`SONIC_FALLBACK_SQL=true`).
+
+**Tras cargar el sample dump**, indexa con el wrapper (comprueba red + DNS):
+
+```bash
+chmod +x scripts/index-sonic.sh
+./scripts/index-sonic.sh --flush
+```
+
+O manualmente (solo dentro del contenedor API, no en el host):
+
+```bash
+docker compose up -d sonic trackrate-api
+docker compose exec trackrate-api getent hosts sonic   # debe mostrar una IP
+docker compose exec trackrate-api python -m scripts.index_sonic_catalog --flush
+```
+
+Comprobar:
+
+```bash
+curl http://localhost:8000/catalog/search-status
+curl "http://localhost:8000/catalog/search?q=beatles&type=artist"
+curl "http://localhost:8000/catalog/suggest?q=beatl&type=artist"
+```
+
+Variables (ver `.env.example`): `SONIC_ENABLED`, `SONIC_HOST`, `SONIC_PASSWORD`, `SONIC_FALLBACK_SQL`.
+
+**Red Docker rota** (`Temporary failure in name resolution` o `not connected to the network trackrate-stack_default`):
+
+```bash
+# NO uses --force-recreate trackrate-api sin --no-deps (intenta parar todo el stack MB)
+chmod +x scripts/repair-docker-network.sh
+./scripts/repair-docker-network.sh
+./scripts/index-sonic.sh --flush
+```
+
+Si falla, identifica el contenedor huérfano: `docker inspect ID --format '{{.Name}}'` y conéctalo: `docker network connect trackrate-stack_default NOMBRE`.
+
+Si la red no se puede recrear (`network ... has active endpoints`):
+
+```bash
+# indexer Solr viejo — ya no se usa (profile manual-index)
+sudo docker rm -f trackrate-stack-indexer-1
+./scripts/repair-docker-network.sh
+```
+
 ### Búsqueda vacía en TrackRate
 
-La búsqueda de catálogo usa **Postgres MusicBrainz** (sin Solr). Comprueba:
+Si Sonic no está indexado, la búsqueda cae en SQL (lento). Comprueba:
 
 ```bash
 docker compose exec db psql -U musicbrainz -d musicbrainz_db -c "SELECT count(*) FROM musicbrainz.artist;"

@@ -1,7 +1,8 @@
-# Scripts shell deben usar LF (Linux/macOS)
 *.sh text eol=lf
+scripts/** text eol=lf
 
 # Docker / env
 Dockerfile text eol=lf
 *.yml text eol=lf
 .env.example text eol=lf
+config/sonic.cfg text eol=lf

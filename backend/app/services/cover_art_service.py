@@ -15,8 +15,14 @@ _CAA_PATH = {
 }
 
 
-def cover_art_url(entity_type: str, mbid: UUID, *, release_mbid: UUID | None = None) -> str | None:
-    """Devuelve URL de imagen front si existe en Cover Art Archive."""
+def cover_art_url(
+    entity_type: str,
+    mbid: UUID,
+    *,
+    release_mbid: UUID | None = None,
+    verify: bool = True,
+) -> str | None:
+    """Devuelve URL de imagen front. Con verify=False solo construye la URL (sin HTTP)."""
     if entity_type == "track" and release_mbid is not None:
         path_type = "release"
         path_id = release_mbid
@@ -27,10 +33,13 @@ def cover_art_url(entity_type: str, mbid: UUID, *, release_mbid: UUID | None = N
         path_id = mbid
 
     base = settings.cover_art_archive_url.rstrip("/")
-    url = f"{base}/{path_type}/{path_id}"
+    url = f"{base}/{path_type}/{path_id}/front"
+    if not verify:
+        return url
+
     try:
-        with httpx.Client(timeout=10.0, follow_redirects=True) as client:
-            response = client.get(f"{url}/front")
+        with httpx.Client(timeout=3.0, follow_redirects=True) as client:
+            response = client.get(url)
             if response.status_code == 404:
                 return None
             if response.status_code >= 400:

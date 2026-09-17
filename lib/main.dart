@@ -1,22 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'api/trackrate_client.dart';
-import 'screens/home_screen.dart';
+import 'providers/trackrate_providers.dart';
+import 'routing/app_router.dart';
+import 'services/auth_storage.dart';
 import 'theme/theme.dart';
 
-void main() {
-  runApp(const Application());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final authStorage = await AuthStorage.create();
+
+  runApp(
+    ProviderScope(
+      overrides: [
+        authStorageProvider.overrideWithValue(authStorage),
+      ],
+      child: const Application(),
+    ),
+  );
 }
 
-class Application extends StatelessWidget {
+class Application extends ConsumerWidget {
   const Application({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final client = TrackRateClient();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
 
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'TrackRate',
       supportedLocales: FLocalizations.supportedLocales,
       localizationsDelegates: const [...FLocalizations.localizationsDelegates],
@@ -26,7 +38,7 @@ class Application extends StatelessWidget {
         data: Theme.brightnessOf(context) == .light ? lightTheme : darkTheme,
         child: FToaster(child: FTooltipGroup(child: child!)),
       ),
-      home: HomeScreen(client: client),
+      routerConfig: router,
     );
   }
 }

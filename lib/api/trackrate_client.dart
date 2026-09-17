@@ -55,6 +55,22 @@ class TrackRateClient {
     return response.map((e) => CatalogItem.fromJson(e as Map<String, dynamic>)).toList();
   }
 
+  Future<List<String>> suggestCatalog({
+    required String query,
+    String? type,
+    int limit = 10,
+  }) async {
+    final response = await _get<List<dynamic>>(
+      '/catalog/suggest',
+      queryParameters: {
+        'q': query,
+        if (type != null) 'type': type,
+        'limit': limit,
+      },
+    );
+    return response.cast<String>();
+  }
+
   Future<CatalogDetail> getCatalogDetail({
     required String entityType,
     required String entityId,
@@ -99,19 +115,40 @@ class TrackRateClient {
     return null;
   }
 
-  Future<AuthUser> login({required String email, required String password}) async {
+  Future<Map<String, dynamic>> health() async {
+    return _get<Map<String, dynamic>>('/health');
+  }
+
+  Future<AuthUser> login({
+    required String identifier,
+    required String password,
+  }) async {
     final response = await _post<Map<String, dynamic>>(
       '/auth/login',
+      data: {'identifier': identifier, 'password': password},
+    );
+    final user = AuthUser.fromTokenResponse(response);
+    setAccessToken(user.accessToken);
+    return user;
+  }
+
+  Future<AuthUser> register({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _post<Map<String, dynamic>>(
+      '/auth/register',
       data: {'email': email, 'password': password},
     );
-    final token = response['access_token'] as String;
-    final user = response['user'] as Map<String, dynamic>;
-    setAccessToken(token);
-    return AuthUser(
-      id: user['id'] as String,
-      email: user['email'] as String,
-      accessToken: token,
-    );
+    final user = AuthUser.fromTokenResponse(response);
+    setAccessToken(user.accessToken);
+    return user;
+  }
+
+  Future<AuthUser> getMe() async {
+    final token = _dio.options.headers['Authorization']?.toString().replaceFirst('Bearer ', '');
+    final response = await _get<Map<String, dynamic>>('/auth/me');
+    return AuthUser.fromMeResponse(response, token ?? '');
   }
 
   Future<List<FeedItem>> getFeed({int limit = 50}) async {
@@ -174,12 +211,28 @@ class TrackRateClient {
   TrackRateException _wrap(DioException error) {
     final status = error.response?.statusCode;
     final detail = error.response?.data;
+    final message = _formatDetail(detail) ??
+        switch (error.type) {
+          DioExceptionType.connectionTimeout ||
+          DioExceptionType.receiveTimeout ||
+          DioExceptionType.sendTimeout =>
+            'Tiempo de espera agotado',
+          DioExceptionType.connectionError => 'No se pudo conectar con el servidor',
+          _ => error.message ?? 'Error de red',
+        };
+    return TrackRateException(message, statusCode: status);
+  }
+
+  String? _formatDetail(Object? detail) {
     if (detail is Map && detail['detail'] != null) {
-      return TrackRateException('${detail['detail']}', statusCode: status);
+      return '${detail['detail']}';
     }
-    return TrackRateException(
-      error.message ?? 'Error de red',
-      statusCode: status,
-    );
+    if (detail is List && detail.isNotEmpty) {
+      final first = detail.first;
+      if (first is Map && first['msg'] != null) {
+        return '${first['msg']}';
+      }
+    }
+    return null;
   }
 }

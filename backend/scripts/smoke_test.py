@@ -29,11 +29,18 @@ def main() -> None:
         check("OpenAPI disponible", openapi.status_code == 200)
         paths = openapi.json().get("paths", {})
         check("/catalog/search en OpenAPI", "/catalog/search" in paths)
+        check("/catalog/suggest en OpenAPI", "/catalog/suggest" in paths)
         check("/entities/top-rated en OpenAPI", "/entities/top-rated" in paths)
         check("Sin POST /catalog/artists", "/catalog/artists" not in paths)
 
+        status = client.get(f"{BASE_URL}/catalog/search-status")
+        check("GET /catalog/search-status", status.status_code == 200)
+
         search = client.get(f"{BASE_URL}/catalog/search", params={"q": "beatles", "type": "artist"})
         check("GET /catalog/search", search.status_code == 200, f"{len(search.json())} resultados")
+
+        suggest = client.get(f"{BASE_URL}/catalog/suggest", params={"q": "beatl", "type": "artist"})
+        check("GET /catalog/suggest", suggest.status_code == 200, str(suggest.json()[:3]))
 
         top = client.get(f"{BASE_URL}/entities/top-rated", params={"type": "track"})
         check("GET /entities/top-rated", top.status_code == 200)

@@ -1,12 +1,23 @@
 from uuid import UUID
 
+import logging
+import time
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
+
+from app.config import settings
 
 from app.models import MusicEntityType, Rating
 from app.schemas.catalog import CatalogDetailResponse, CatalogItemResponse, TopRatedEntityResponse
 from app.services.cover_art_service import cover_art_url
 from app.services.musicbrainz_db import MusicBrainzDbError, search as db_search
+from app.services.search_rank import (
+    dedupe_search_results,
+    needs_broader_search,
+    rerank_search_results,
+)
+from app.services.sonic_search import SonicSearchError, search as sonic_search, suggest as sonic_suggest
 from app.services.musicbrainz_client import (
     MusicBrainzClient,
     MusicBrainzError,
@@ -17,6 +28,7 @@ from app.services.musicbrainz_client import (
 )
 
 _mb = MusicBrainzClient()
+logger = logging.getLogger(__name__)
 
 SEARCH_LIMIT = 50
 TOP_RATED_LIMIT = 50
@@ -44,11 +56,16 @@ def _mbid(item: dict) -> UUID:
     return UUID(item["id"])
 
 
-def _mb_item(raw: dict, entity_type: str) -> CatalogItemResponse:
+def _mb_item(
+    raw: dict,
+    entity_type: str,
+    *,
+    verify_cover: bool = False,
+) -> CatalogItemResponse:
     title = raw.get("title") or raw.get("name") or ""
     subtitle = None if entity_type == "artist" else artist_credit(raw)
     mbid = _mbid(raw)
-    image = cover_art_url(entity_type, mbid)
+    image = cover_art_url(entity_type, mbid, verify=verify_cover)
     return CatalogItemResponse(
         id=mbid,
         type=entity_type,
@@ -69,19 +86,114 @@ def search_catalog(
     if not clean:
         return []
 
-    try:
-        results = db_search(clean, entity_type, limit=SEARCH_LIMIT)
-    except MusicBrainzDbError as exc:
-        raise CatalogSearchError(
-            "No se pudo consultar MusicBrainz Postgres. "
-            "Comprueba MUSICBRAINZ_DATABASE_URL y GET /catalog/mb-status"
-        ) from exc
+    results: list[dict] = []
+    source = "empty"
+    sonic_failed = False
+    started = time.perf_counter()
+
+    if settings.sonic_enabled:
+        try:
+            results = sonic_search(clean, entity_type, limit=SEARCH_LIMIT)
+            source = "sonic"
+        except SonicSearchError as exc:
+            sonic_failed = True
+            if not settings.sonic_fallback_sql:
+                raise CatalogSearchError(str(exc)) from exc
+            logger.warning("Sonic no disponible, fallback SQL: %s", exc)
+
+    # Sonic puede devolver "Beatles Ranked" antes que "The Beatles" — ampliar con SQL ILIKE.
+    if (
+        results
+        and settings.sonic_fallback_sql
+        and needs_broader_search(clean, results)
+    ):
+        try:
+            extra = db_search(
+                clean,
+                entity_type,
+                limit=SEARCH_LIMIT * 3,
+                prefix_only=False,
+            )
+            if extra:
+                results = rerank_search_results(
+                    clean,
+                    dedupe_search_results(results + extra),
+                    limit=SEARCH_LIMIT,
+                )
+                source = "sonic+sql"
+        except MusicBrainzDbError as exc:
+            logger.warning("Ampliación SQL tras Sonic falló: %s", exc)
+
+    # Solo SQL si Sonic falló — no si devolvió vacío (evita ILIKE lento de 60s+)
+    if not results and sonic_failed and settings.sonic_fallback_sql:
+        try:
+            prefix = db_search(clean, entity_type, limit=SEARCH_LIMIT * 3, prefix_only=True)
+            contains: list[dict] = []
+            if len(clean) >= 3:
+                contains = db_search(
+                    clean,
+                    entity_type,
+                    limit=SEARCH_LIMIT * 3,
+                    prefix_only=False,
+                )
+            results = rerank_search_results(
+                clean,
+                dedupe_search_results(prefix + contains),
+                limit=SEARCH_LIMIT,
+            )
+            source = "sql"
+        except MusicBrainzDbError as exc:
+            raise CatalogSearchError(
+                "No se pudo consultar MusicBrainz Postgres. "
+                "Comprueba MUSICBRAINZ_DATABASE_URL y GET /catalog/mb-status"
+            ) from exc
 
     items: list[CatalogItemResponse] = []
     for raw in results:
         etype = raw.pop("_trackrate_type", entity_type or "track")
-        items.append(_mb_item(raw, etype))
+        items.append(_mb_item(raw, etype, verify_cover=False))
+
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    logger.info(
+        "catalog search q=%r type=%s source=%s results=%d ms=%.0f",
+        clean,
+        entity_type,
+        source,
+        len(items),
+        elapsed_ms,
+    )
     return items
+
+
+def suggest_catalog(
+    query: str,
+    entity_type: str | None = None,
+    *,
+    limit: int = 10,
+) -> list[str]:
+    clean = query.strip()
+    if not clean:
+        return []
+
+    if not settings.sonic_enabled:
+        if settings.sonic_fallback_sql:
+            from app.services.musicbrainz_db import prefix_search
+
+            return prefix_search(clean, entity_type, limit=limit)
+        raise CatalogSearchError("Sonic desactivado; suggest no disponible")
+
+    try:
+        return sonic_suggest(clean, entity_type, limit=limit)
+    except SonicSearchError as exc:
+        if settings.sonic_fallback_sql:
+            from app.services.musicbrainz_db import MusicBrainzDbError, prefix_search
+
+            logger.warning("Suggest Sonic falló, fallback SQL: %s", exc)
+            try:
+                return prefix_search(clean, entity_type, limit=limit)
+            except MusicBrainzDbError:
+                return []
+        raise CatalogSearchError(str(exc)) from exc
 
 
 def list_albums_by_artist(db: Session, artist_id: UUID) -> list[CatalogItemResponse]:

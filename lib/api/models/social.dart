@@ -1,13 +1,66 @@
+class UserProfile {
+  const UserProfile({
+    required this.id,
+    required this.username,
+    required this.firstName,
+    required this.lastName,
+    this.displayName,
+    this.avatarUrl,
+  });
+
+  factory UserProfile.fromJson(Map<String, dynamic> json) => UserProfile(
+    id: json['id'] as String,
+    username: json['username'] as String,
+    firstName: json['first_name'] as String,
+    lastName: json['last_name'] as String,
+    displayName: json['display_name'] as String?,
+    avatarUrl: json['avatar_url'] as String?,
+  );
+
+  final String id;
+  final String username;
+  final String firstName;
+  final String lastName;
+  final String? displayName;
+  final String? avatarUrl;
+
+  String get label => displayName ?? username;
+}
+
 class AuthUser {
   const AuthUser({
     required this.id,
     required this.email,
     required this.accessToken,
+    this.profile,
   });
+
+  factory AuthUser.fromTokenResponse(Map<String, dynamic> json) {
+    final token = json['access_token'] as String;
+    final user = json['user'] as Map<String, dynamic>;
+    final profileJson = user['profile'] as Map<String, dynamic>?;
+    return AuthUser(
+      id: user['id'] as String,
+      email: user['email'] as String,
+      accessToken: token,
+      profile: profileJson != null ? UserProfile.fromJson(profileJson) : null,
+    );
+  }
+
+  factory AuthUser.fromMeResponse(Map<String, dynamic> json, String accessToken) {
+    final profileJson = json['profile'] as Map<String, dynamic>?;
+    return AuthUser(
+      id: json['id'] as String,
+      email: json['email'] as String,
+      accessToken: accessToken,
+      profile: profileJson != null ? UserProfile.fromJson(profileJson) : null,
+    );
+  }
 
   final String id;
   final String email;
   final String accessToken;
+  final UserProfile? profile;
 }
 
 class RatingDetail {

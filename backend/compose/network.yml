@@ -1,0 +1,5 @@
+# Red explícita compartida por TrackRate + Sonic (misma red que el stack unificado).
+networks:
+  default:
+    name: trackrate-stack_default
+    driver: bridge

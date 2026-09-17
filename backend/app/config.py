@@ -25,5 +25,16 @@ class Settings(BaseSettings):
     musicbrainz_timeout_seconds: float = 15.0
     cover_art_archive_url: str = "https://coverartarchive.org"
 
+    sonic_enabled: bool = True
+    sonic_host: str = "host.docker.internal"
+    sonic_port: int = 1491
+    sonic_password: str = "TrackRateSonicDev"
+    sonic_collection: str = "catalog"
+    sonic_fallback_sql: bool = True
+    sonic_timeout_seconds: float = 60.0
+    sonic_query_timeout_seconds: float = 8.0
+    sonic_query_read_timeout_seconds: float = 120.0
+    sonic_probe_timeout_seconds: float = 5.0
+
 
 settings = Settings()

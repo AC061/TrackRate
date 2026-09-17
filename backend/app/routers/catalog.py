@@ -9,6 +9,7 @@ from app.db.session import get_db
 from app.schemas.catalog import CatalogDetailResponse, CatalogItemResponse, CoverResponse
 from app.services import catalog_service
 from app.services import musicbrainz_db
+from app.services import sonic_search
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,26 @@ def search_catalog(
 @router.get("/mb-status")
 def musicbrainz_db_status() -> dict:
     return musicbrainz_db.ping()
+
+
+@router.get("/search-status")
+def catalog_search_status() -> dict:
+    return {
+        "musicbrainz_db": musicbrainz_db.ping(),
+        "sonic": sonic_search.ping(),
+    }
+
+
+@router.get("/suggest", response_model=list[str])
+def suggest_catalog(
+    q: str = Query(default="", min_length=1, max_length=100),
+    type: str | None = Query(default=None, pattern=r"^(artist|album|track)$"),
+    limit: int = Query(default=10, ge=1, le=20),
+) -> list[str]:
+    try:
+        return catalog_service.suggest_catalog(q, type, limit=limit)
+    except catalog_service.CatalogSearchError as exc:
+        raise HTTPException(503, str(exc)) from exc
 
 
 @router.get("/artists/{artist_id}/albums", response_model=list[CatalogItemResponse])
